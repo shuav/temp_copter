@@ -995,7 +995,7 @@ void GCS_MAVLINK::send_message(enum ap_message id)
     // if there are no deferred messages, attempt to send straight away:
     if (num_deferred_messages == 0)
     {
-    	 hal.uartC->printf("id=%d\r\n",id);
+//    	 hal.uartC->printf("id=%d\r\n",id);
         if (try_send_message(id)) //发送数据
         {
             // yay, we sent it!

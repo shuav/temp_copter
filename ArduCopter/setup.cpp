@@ -36,7 +36,8 @@ void Copter::report_compass()
             hal.console->printf("Current");
         }
         Vector3f motor_compensation;
-        for (uint8_t i=0; i<compass.get_count(); i++) {
+        for (uint8_t i=0; i<compass.get_count(); i++)
+        {
             motor_compensation = compass.get_motor_compensation(i);
             hal.console->printf("\nComMot%d: %4.2f, %4.2f, %4.2f\n",
                         (int)i,

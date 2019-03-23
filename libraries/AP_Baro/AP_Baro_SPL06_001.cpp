@@ -62,7 +62,7 @@ bool AP_BARO_SPL06_001::_init()
 	uint8_t whoami=0;
 
 	uint8_t coef[18];
-	const char *name = "SPL06_001";
+//	const char *name = "SPL06_001";
 	  _state = 0;
 	  _count=0;
 	  Spl06_Temp = 0;
@@ -99,8 +99,8 @@ bool AP_BARO_SPL06_001::_init()
     }
     else
     {
-    	hal.uartC->printf("whoami=%d\r\n",whoami);
-    	hal.uartC->printf("%s found on bus %u address 0x%02x\n", name, _dev->bus_num(), _dev->get_bus_address());
+//    	hal.uartC->printf("whoami=%d\r\n",whoami);
+//    	hal.uartC->printf("%s found on bus %u address 0x%02x\n", name, _dev->bus_num(), _dev->get_bus_address());
     	//开始读取ROM值
     	_dev->read_registers(SPL06_001_COEF, coef, 18); //读取ID上面的值
         _C0 = ((int16_t)coef[0] << 4) + ((coef[1] & 0xF0) >> 4);

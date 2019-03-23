@@ -574,7 +574,8 @@ void Copter::init_simple_bearing()
     super_simple_sin_yaw = simple_sin_yaw;
 
     // log the simple bearing to dataflash
-    if (should_log(MASK_LOG_ANY)) {
+    if (should_log(MASK_LOG_ANY))
+    {
         Log_Write_Data(DATA_INIT_SIMPLE_BEARING, ahrs.yaw_sensor);
     }
 }

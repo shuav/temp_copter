@@ -204,13 +204,13 @@ void AP_RangeFinder_HL6_M30::update(void)
 	hal.uartC->printf("HL6_M30 update \r\n");
     if (get_reading(state.distance_cm))
     {
-    	hal.uartC->printf("HL6_M30 Read complete  \r\n");
+//    	hal.uartC->printf("HL6_M30 Read complete  \r\n");
         // update range_valid state based on distance measured
         last_reading_ms = AP_HAL::millis();
         update_status();
     } else if (AP_HAL::millis() - last_reading_ms > 200)
     {
-    	hal.uartC->printf("HL6_M30 Read fail  \r\n");
+//    	hal.uartC->printf("HL6_M30 Read fail  \r\n");
         set_status(RangeFinder::RangeFinder_NoData);
     }
 }
@@ -228,10 +228,10 @@ bool AP_RangeFinder_HL6_M30::hl6_m30_CRC16(uint8_t *aBuffer, uint8_t aLength,uin
 	 {
 		 crc+=aBuffer[i];
 	 }
-	 hal.uartC->printf("crc=%d\r\n",crc);
+//	 hal.uartC->printf("crc=%d\r\n",crc);
 	 crc_data=(uint8_t)(~crc)+1;
-	 hal.uartC->printf("check_data=%d\r\n",check_data);
-	 hal.uartC->printf("crc_data=%d\r\n",crc_data);
+//	 hal.uartC->printf("check_data=%d\r\n",check_data);
+//	 hal.uartC->printf("crc_data=%d\r\n",crc_data);
 
 	 if(crc_data==check_data) //查看最低位是否是1，是1说明数据无效，因为没有数据是0，取反得到1，
 	 {

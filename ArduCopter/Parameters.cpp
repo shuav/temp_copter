@@ -1123,9 +1123,12 @@ const AP_Param::ConversionInfo conversion_table[] = {
     { Parameters::k_param_failsafe_battery_enabled,0, AP_PARAM_INT8,   "BATT_FS_LOW_ACT" },
 };
 
+
+
 void Copter::load_parameters(void)
 {
-    if (!AP_Param::check_var_info()) {
+    if (!AP_Param::check_var_info())
+    {
         hal.console->printf("Bad var table\n");
         AP_HAL::panic("Bad var table");
     }
@@ -1290,3 +1293,4 @@ void Copter::convert_pid_parameters(void)
         upgrading_frame_params = true;
     }
 }
+
