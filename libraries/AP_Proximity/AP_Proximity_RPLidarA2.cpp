@@ -344,11 +344,11 @@ void AP_Proximity_RPLidarA2::get_readings()
 
             case rp_resetted:          //1
                 Debug(3, "                  BYTE_COUNT %d", _byte_count);
-                if ((c == 0x52 || _information_data) && _byte_count < 62)
+                if ((c == 0x52 || _information_data) && _byte_count < 62) //_information_data刚开始是0，_byte_count字节计数小于62
                 {
-                    if (c == 0x52)
+                    if (c == 0x52) //确实雷达是健康的
                     {
-                        _information_data = true;
+                        _information_data = true;  //设定_information_data=1
                     }
                     _rp_systeminfo[_byte_count] = c;
                     Debug(3, "_rp_systeminfo[%d]=%x",_byte_count,_rp_systeminfo[_byte_count]);

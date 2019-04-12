@@ -53,7 +53,7 @@ AP_OpticalFlow_PX4Flow *AP_OpticalFlow_PX4Flow::detect(OpticalFlow &_frontend)
     }
     if (!sensor->setup_sensor())
     {
-    	hal.console->printf("***^^^***1234567\r\n");
+//    	hal.console->printf("***^^^***1234567\r\n");
         delete sensor;
         return nullptr;
     }
@@ -110,7 +110,7 @@ bool AP_OpticalFlow_PX4Flow::scan_buses(void)
             hal.scheduler->delay(10);
         }
     }
-    hal.console->printf("success=%d\r\n",success);
+//    hal.console->printf("success=%d\r\n",success);
     return success;
 }
 
@@ -121,7 +121,7 @@ bool AP_OpticalFlow_PX4Flow::setup_sensor(void)
 {
     if (!scan_buses())
     {
-    	hal.console->printf("***^^^***12345678\r\n");
+//    	hal.console->printf("***^^^***12345678\r\n");
         return false;
     }
     // read at 10Hz

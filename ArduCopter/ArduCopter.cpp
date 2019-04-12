@@ -107,7 +107,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK(read_rangefinder,      20,    100), //读取近距离传感器，最终得到有效的数据_rangefinder_alt_cm
 #endif
 #if PROXIMITY_ENABLED == ENABLED
-    SCHED_TASK_CLASS(AP_Proximity,         &copter.g2.proximity,        update,         100,  50), //更新数据
+    SCHED_TASK_CLASS(AP_Proximity,         &copter.g2.proximity,        update,         100,  50), //更新避障传感器数据
 #endif
 #if BEACON_ENABLED == ENABLED
     SCHED_TASK_CLASS(AP_Beacon,            &copter.g2.beacon,           update,         400,  50),

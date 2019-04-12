@@ -142,8 +142,40 @@ void Copter::ModeZigZag::run()
 		    case Zigzag_Auto:
 
 
-		    	if(zigzag_auto_complete_state && !zigzag_change_yaw) //第一次：zigzag_auto_complete_state=1，zigzag_change_yaw=0;
+		    	//躲避障碍物
+
+		    	    uint16_t rc9_in = RC_Channels::rc_channel(CH_9)->get_radio_in();
+		    		if(rc9_in>1500)
+		    		{
+
+		    		zigzag_waypoint_state.meet_obstacle=1;
+		    		}
+		    		else
+		    			zigzag_waypoint_state.meet_obstacle=0;
+
+
+
+		    	if(zigzag_auto_complete_state && !zigzag_change_yaw||(zigzag_waypoint_state.meet_obstacle&&!zigzag_waypoint_state.obstacle_flag)) //第一次：zigzag_auto_complete_state=1，zigzag_change_yaw=0;
 		    	{
+
+		    		//没有遇见障碍物，航线不变
+		    	    if(!zigzag_waypoint_state.meet_obstacle)
+		    		{
+		    		 //zigzag_waypoint_state.index++;
+		    		zigzag_waypoint_state.obstacle_flag=0;
+		    			}
+
+		    		 else
+		    	{
+		    	 zigzag_waypoint_state.obstacle_flag++;
+		    	 if(zigzag_waypoint_state.obstacle_flag==3)
+		    	 {
+		    	 //zigzag_waypoint_state.obstacle_flag=0;
+		         zigzag_waypoint_state.index=zigzag_waypoint_state.index-1;//保护最后的航点
+		    		}
+		    	}
+
+
 
 		           wp_nav->wp_and_spline_init();
 		           zigzag_set_destination();
@@ -413,13 +445,20 @@ void Copter::ModeZigZag::zigzag_set_destination(void)
 	float dotproduct;
 
 
+
+
+
 	switch(zigzag_waypoint_state.bp_mode)
 	{
 	case Zigzag_None:
+		//没有遇见障碍物，航线不变
+		if(!zigzag_waypoint_state.obstacle_flag)
+	    zigzag_waypoint_state.index++;
 
-		zigzag_waypoint_state.index++;
+
 
 		zigzag_calculate_next_dest(next, zigzag_waypoint_state.index);
+
 
 		wp_nav->set_wp_destination(next, false);
 
@@ -506,6 +545,7 @@ void Copter::ModeZigZag::zigzag_set_destination(void)
 void Copter::ModeZigZag::zigzag_calculate_next_dest(/*Location_Class& dest*/Vector3f& next, uint16_t index)
 {
 	Vector3f v_A2B  = zigzag_waypoint_state.vB_pos - zigzag_waypoint_state.vA_pos;
+	Vector3f last_next,bearing_error;
 	v_A2B.z = 0;
 
 	float dist_AB = v_A2B.length();
@@ -514,6 +554,7 @@ void Copter::ModeZigZag::zigzag_calculate_next_dest(/*Location_Class& dest*/Vect
 	float c1 = 0.0f;//v_A2B.x * zigzag_waypoint_state.vB_pos.x + v_A2B.y * zigzag_waypoint_state.vB_pos.y;
 	float a2=0, b2=0, c2 = 0;
 
+    //gcs().send_text(MAV_SEVERITY_INFO, "ModeZigZag: rc9_in=%f meet_obstacle=%f", (double)rc9_in, (double)zigzag_waypoint_state.meet_obstacle);
 
 	switch(index%4)
 	{
@@ -538,6 +579,9 @@ void Copter::ModeZigZag::zigzag_calculate_next_dest(/*Location_Class& dest*/Vect
 		break;
 	}
 
+
+
+
 	//Vector3f next;
 	float denominator = (a1 * b2 - a2 * b1);
 
@@ -545,6 +589,129 @@ void Copter::ModeZigZag::zigzag_calculate_next_dest(/*Location_Class& dest*/Vect
 	{
 		next.x = (c1 * b2 - c2 * b1) / denominator;
 		next.y = -(c1 * a2 - c2 * a1) / denominator;
+	}
+
+
+
+	//简单替代
+		next_location=next;
+		next_location.z=0;
+
+		last_next=next_location-last_location;
+		bearing_error=last_next-v_A2B;
+
+
+
+
+		float dist_direction=bearing_error.length();
+		//(last_next-v_A2B).length();
+		//飞行方向和AB方向相同
+		if(!zigzag_waypoint_state.obstacle_flag)
+		{
+		if(dist_direction<9)
+			fly_direction=1;
+			//飞行方向和AB方向不相同
+			else
+				fly_direction=-1;
+
+				  gcs().send_text(MAV_SEVERITY_INFO, " last_location.x=%f next_location.x=%f", (double)last_location.x, (double)next_location.x);
+			      gcs().send_text(MAV_SEVERITY_INFO, "dist_direction=%f fly_direction=%f", (double)dist_direction, (double)fly_direction);
+
+		}
+
+	//记录飞行过的位置
+	  last_location.x=next.x;
+	  last_location.y=next.y;
+	  last_location.z=0;
+
+
+
+	gcs().send_text(MAV_SEVERITY_INFO, "ModeZigZag: index=%f obstacle_flag=%f", (double)zigzag_waypoint_state.index, (double)zigzag_waypoint_state.obstacle_flag);
+	gcs().send_text(MAV_SEVERITY_INFO, "ModeZigZag: next.x=%f next.y=%f", (double)next.x, (double)next.y);
+
+
+	if(index==1)
+	{
+	zigzag_waypoint_state.vC_pos.x=next.x;
+	zigzag_waypoint_state.vC_pos.y=next.y;
+	}
+
+	//遇到障碍物，重新规划航线
+	Vector3f obstacle_break=inertial_nav.get_position();
+	Vector3f virtual_obstacle,avoid_point;
+	float right_away=500,front_away=500;//单位是cm
+
+
+	//逆时针旋转当前点到虚拟y轴 A点成为原点（0，0）
+	obstacle_break.z = 0;
+	float dist_obstacle_break = obstacle_break.length();
+	//AB线与X轴的夹角为α，障碍物点与X轴的夹角为β
+	//cos（α+β）=cosαcosβ-sinαsinβ
+	//sin （α+β）=sinαcosβ+cosαsinβ
+
+	//virtual_obstacle.x=dist_obstacle_break*((v_A2B.y/dist_AB)*(obstacle_break.x/dist_obstacle_break)-(v_A2B.x/dist_AB)*(obstacle_break.y/dist_obstacle_break));
+	//virtual_obstacle.y=dist_obstacle_break*((v_A2B.x/dist_AB)*(obstacle_break.x/dist_obstacle_break)+(v_A2B.y/dist_AB)*(obstacle_break.y/dist_obstacle_break));
+
+
+
+	switch(zigzag_waypoint_state.obstacle_flag)
+		{
+		case 1:
+			  zigzag_waypoint_state.avoidA_pos.x=obstacle_break.x+fly_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.x-zigzag_waypoint_state.vB_pos.x);
+			  zigzag_waypoint_state.avoidA_pos.y=obstacle_break.y+fly_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.y-zigzag_waypoint_state.vB_pos.y);
+			  next.x = zigzag_waypoint_state.avoidA_pos.x;
+			  next.y = zigzag_waypoint_state.avoidA_pos.y;
+
+			  gcs().send_text(MAV_SEVERITY_INFO, " vA_pos.x=%f vA_pos.y=%f", (double)zigzag_waypoint_state.vA_pos.x, (double)zigzag_waypoint_state.vA_pos.y);
+	          gcs().send_text(MAV_SEVERITY_INFO, "vB_pos.x=%f vB_pos.y=%f", (double)zigzag_waypoint_state.vB_pos.x, (double)zigzag_waypoint_state.vB_pos.y);
+	          gcs().send_text(MAV_SEVERITY_INFO, "vC_pos.x=%f vC_pos.y=%f", (double)zigzag_waypoint_state.vC_pos.x, (double)zigzag_waypoint_state.vC_pos.y);
+
+	          gcs().send_text(MAV_SEVERITY_INFO, "obstacle_break.x=%f obstacle_break.y=%f", (double)obstacle_break.x, (double)obstacle_break.y);
+	          gcs().send_text(MAV_SEVERITY_INFO, "avoidA_pos.x=%f avoidA_pos.y=%f", (double)zigzag_waypoint_state.avoidA_pos.x, (double)zigzag_waypoint_state.avoidA_pos.y);
+
+			//avoid_point.x=virtual_obstacle.x+right_away;
+		      //avoid_point.y=virtual_obstacle.y;
+
+		      break;
+		case 2:
+			   zigzag_waypoint_state.avoidB_pos.x=zigzag_waypoint_state.avoidA_pos.x+fly_direction*front_away/dist_AB*v_A2B.x;
+			   zigzag_waypoint_state.avoidB_pos.y=zigzag_waypoint_state.avoidA_pos.y+fly_direction*front_away/dist_AB*v_A2B.y;
+			   next.x = zigzag_waypoint_state.avoidB_pos.x;
+			   next.y = zigzag_waypoint_state.avoidB_pos.y;
+
+			  //avoid_point.x=virtual_obstacle.x+right_away;
+			  //avoid_point.y=virtual_obstacle.y+front_away;
+			  break;
+		case 3:
+			   zigzag_waypoint_state.avoidC_pos.x=zigzag_waypoint_state.avoidB_pos.x-fly_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.x-zigzag_waypoint_state.vB_pos.x);
+			   zigzag_waypoint_state.avoidC_pos.y=zigzag_waypoint_state.avoidB_pos.y-fly_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.y-zigzag_waypoint_state.vB_pos.y);
+			   next.x = zigzag_waypoint_state.avoidC_pos.x;
+			   next.y = zigzag_waypoint_state.avoidC_pos.y;
+
+			 //avoid_point.x=virtual_obstacle.x;
+			 //avoid_point.y=virtual_obstacle.y+front_away;
+			 break;
+		default:break;
+		}
+
+	//顺时针旋转，回到真实点
+    //cos（α-β）=cosαcosβ+sinαsinβ
+	//sin（α-β）=sinαcosβ-cosαsinβ
+	/*
+	avoid_point.z=0;
+	float dist_avoid_point = avoid_point.length();
+
+	if(zigzag_waypoint_state.obstacle_flag)
+	{
+		next.x =zigzag_waypoint_state.vA_pos.x+dist_avoid_point*((v_A2B.y/dist_AB)*(avoid_point.x/dist_avoid_point)+(v_A2B.y/dist_AB)*(avoid_point.x/dist_avoid_point));
+
+		next.y = zigzag_waypoint_state.vA_pos.y+dist_avoid_point*((v_A2B.x/dist_AB)*(avoid_point.x/dist_avoid_point)-(v_A2B.y/dist_AB)*(avoid_point.y/dist_avoid_point));
+	}
+*/
+	if(zigzag_waypoint_state.obstacle_flag)
+	{
+	gcs().send_text(MAV_SEVERITY_WARNING, "There is a obstacle in the front");
+    AP_Notify::flags.zigzag_record = 16;
 	}
 
 	next.z = inertial_nav.get_position().z;

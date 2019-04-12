@@ -103,6 +103,9 @@ void Copter::read_multiaux_switches()
 	int8_t switch_position;
 	uint16_t rc7_in = RC_Channels::rc_channel(CH_7)->get_radio_in();
 	uint16_t rc6_in = RC_Channels::rc_channel(CH_6)->get_radio_in();
+
+
+
     if      (rc7_in < 1131) switch_position = 0; // Initial, no input
     else if (rc7_in < 1261) switch_position = 1; // Pump on
     else if (rc7_in < 1391) switch_position = 2; // Pump off
@@ -246,6 +249,19 @@ void Copter::read_aux_switches()
 {
     uint8_t switch_position;
 
+
+	//避障测试，虚拟障碍物信息
+   /*
+    uint16_t rc9_in = RC_Channels::rc_channel(CH_9)->get_radio_in();
+	if(rc9_in<1500)
+	{
+	gcs().send_text(MAV_SEVERITY_WARNING, "There is a obstacle in the front");
+	AP_Notify::flags.zigzag_record = 16;
+	//_pos_target.z=1000;
+	pos_control->set_alt_target(200);
+	}
+*/
+
     // exit immediately during radio failsafe
     if (failsafe.radio || failsafe.radio_counter != 0)
     {
@@ -265,6 +281,8 @@ void Copter::read_aux_switches()
         read_aux_switch(CH_10, aux_con.CH10_flag, g.ch10_option);
         read_aux_switch(CH_11, aux_con.CH11_flag, g.ch11_option);
         read_aux_switch(CH_12, aux_con.CH12_flag, g.ch12_option);
+
+
 
     }
 

@@ -675,7 +675,7 @@ void AP_Baro::update(void)
             drivers[i]->backend_update(i);
         }
     }
-    hal.console->printf("_num_drivers=%d\r\n",_num_drivers);
+//    hal.console->printf("_num_drivers=%d\r\n",_num_drivers);
     for (uint8_t i=0; i<_num_sensors; i++)
     {
         if (sensors[i].healthy)

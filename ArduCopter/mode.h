@@ -1312,7 +1312,21 @@ public:
 		    Vector3f vA_pos;          // convert location to vector
 		    Vector3f vB_pos;
 		    Vector3f vBP_pos;
+
+		   int8_t  obstacle_flag;//增加遇见障碍物标志量
+		   int8_t meet_obstacle;
+
+		   //增加3个避障航点
+		   Vector3f vC_pos;
+		   Vector3f avoidA_pos;
+		   Vector3f avoidB_pos;
+		   Vector3f avoidC_pos;
 		} zigzag_waypoint_state;
+
+		//避障用变量
+		Vector3f last_location;
+		Vector3f next_location;
+		int8_t fly_direction;
 
 
 		   void zigzag_manual_control(void);

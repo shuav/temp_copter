@@ -1000,7 +1000,8 @@ void GCS_MAVLINK_Copter::handleMessage(mavlink_message_t* msg)
             // param4 : relative offset (1) or absolute angle (0)
             if ((packet.param1 >= 0.0f)   &&
             	(packet.param1 <= 360.0f) &&
-            	(is_zero(packet.param4) || is_equal(packet.param4,1.0f))) {
+            	(is_zero(packet.param4) || is_equal(packet.param4,1.0f)))
+            {
                 copter.flightmode->auto_yaw.set_fixed_yaw(
                     packet.param1,
                     packet.param2,
@@ -1017,7 +1018,8 @@ void GCS_MAVLINK_Copter::handleMessage(mavlink_message_t* msg)
             // param2 : new speed in m/s
             // param3 : unused
             // param4 : unused
-            if (packet.param2 > 0.0f) {
+            if (packet.param2 > 0.0f)
+            {
                 copter.wp_nav->set_speed_xy(packet.param2 * 100.0f);
                 result = MAV_RESULT_ACCEPTED;
             } else {

@@ -108,7 +108,8 @@ bool AP_Compass_IST8310::init()
 {
     uint8_t reset_count = 0;
 
-    if (!_dev->get_semaphore()->take(HAL_SEMAPHORE_BLOCK_FOREVER)) {
+    if (!_dev->get_semaphore()->take(HAL_SEMAPHORE_BLOCK_FOREVER))
+    {
         return false;
     }
 
@@ -116,8 +117,10 @@ bool AP_Compass_IST8310::init()
     _dev->set_retries(10);
 
     uint8_t whoami;
-    if (!_dev->read_registers(WAI_REG, &whoami, 1) ||
-        whoami != DEVICE_ID) {
+    hal.console->printf("^^^^^*******^^^^\r\n");
+    if (!_dev->read_registers(WAI_REG, &whoami, 1) ||whoami != DEVICE_ID)
+    {
+    	 hal.console->printf("whoami=%d\r\n",whoami);
         // not an IST8310
         goto fail;
     }

@@ -95,7 +95,7 @@ AP_RangeFinder_Backend( _state)
 *****************************************************************************************************************************/
 bool AP_RangeFinder_HPS_167UL::detect(AP_SerialManager &serial_manager,uint8_t serial_instance)
 {
-	hal.console->printf("AP_RangeFinder_HPS_167UL\n\r");
+//	hal.console->printf("AP_RangeFinder_HPS_167UL\n\r");
 
 	return serial_manager.find_serial(AP_SerialManager::SerialProtocol_HPS167UL, serial_instance) != nullptr;
 

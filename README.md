@@ -4,7 +4,7 @@
 *文件功能：函数任务
 *修改日期：2018-9-7
 *修改作者：cihang_uav
-*备注信息： 编译代码：./waf configure --board fmuv5
+*备注信息： 编译代码：./waf configure --board fmuv6
 *备注信息： 下载代码：./waf --targets bin/arducopter --upload
 *备注信息： 更新子模块：git submodule update --init --recursive
 *备注信息： Code commit statistics can be found here: https://github.com/ArduPilot/ardupilot/graphs/contributors
@@ -29,9 +29,9 @@
           2018-10-15:修改实现植保AB点控制移植，其中采用八通道进行AB点打点操作，
           2018-10-16:修改内八上锁，外八解锁
           2018-10-18:仿真命令：sudo apt-get install build-essential---初始化编辑器
-                             cd ArduCopter
+                             cd ArduCopter (cd Desktop/XYZ/Copter_3.6.5_master/ArduCopter)
                              ../Tools/autotest/sim_vehicle.py --console --map
-                             output add 192.168.159.1:14550
+                             output add 192.168.1.121:14550
           2018-10-24:修复自己的SITL仿真问题：
                              case RECOND_ZIGZAG:do_aux_function(ch_option, ch_flag);
 

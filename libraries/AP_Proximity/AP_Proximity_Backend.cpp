@@ -18,6 +18,10 @@
 #include "AP_Proximity.h"
 #include "AP_Proximity_Backend.h"
 
+//测试雷达用，读取雷达的最近障碍物的距离
+//#include <ctype.h>
+//extern const AP_HAL::HAL &hal;
+
 /*
   base class constructor. 
   This incorporates initialisation as well.
@@ -250,6 +254,13 @@ void AP_Proximity_Backend::update_boundary_for_sector(uint8_t sector)
     if (!_distance_valid[prev_sector_ccw]) {
         _boundary_point[prev_sector_ccw] = _sector_edge_vector[prev_sector_ccw] * shortest_distance;
     }
+
+    //测试用雷达用
+   // float angle_deg,distance;
+  //  get_closest_object(angle_deg,  distance);
+  //  hal.console->printf("\n\n angle_deg= %f,\n\n distance= %f\n",angle_deg,distance);
+    //hal.console->printf("hello,world\n");
+
 }
 
 
