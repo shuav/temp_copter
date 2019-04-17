@@ -1254,13 +1254,16 @@ enum ZigzagBPMode
 	Zigzag_ModeSwitch,
 	Zigzag_PilotOverride,
 };
-class ModeZigZag : public Mode
+class ModeZigZag : public Mode//继承避障数据
 {
 
 public:
 
     //继承构造函数------inherit constructor
     using Copter::Mode::Mode;
+
+   // void Copter::ModeZigZag(const AP_Proximity& proximity);
+
 
     bool init(bool ignore_checks) override;
     void run() override;
@@ -1323,11 +1326,13 @@ public:
 		   Vector3f avoidC_pos;
 		} zigzag_waypoint_state;
 
+
 		//避障用变量
 		Vector3f last_location;
 		Vector3f next_location;
-		int8_t fly_direction;
-
+		int8_t fly_direction,avoid_direction;
+		float object_angle[8],object_distance[8];
+		//const AP_Proximity & _object;
 
 		   void zigzag_manual_control(void);
 			void zigzag_auto_control(void);

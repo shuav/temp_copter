@@ -20,8 +20,26 @@ struct {
 *修改作者：cihang_uav
 *备注信息：ZigZag_init - initialise stabilize controller
 *************************************************************************************************************************/
+//int temp_loop=0;
 void Copter::read_control_switch()
 {
+	//测试激光传感器用
+	/*
+	int8_t i;
+      float object__angle_temp,object_distance_temp;
+
+temp_loop++;
+if(temp_loop>9000)
+{
+	temp_loop=0;
+	   for (i=0;i<8;i++)
+			    	{
+			    	copter.g2.proximity.get_object_angle_and_distance(i,object__angle_temp,object_distance_temp);
+			   	     gcs().send_text(MAV_SEVERITY_INFO, "object: sector=%f  distance=%f", (double)i,(double)object_distance_temp);
+			    	}
+
+}
+*/
     if (g.flight_mode_chan <= 0) {
         // no flight mode channel
         return;

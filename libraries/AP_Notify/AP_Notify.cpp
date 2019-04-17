@@ -348,6 +348,8 @@ void AP_Notify::update(void)
 {
     for (uint8_t i = 0; i < _num_devices; i++)
     {
+    	//AP_Notify::flags.zigzag_record_mode_erro=4;
+    	//AP_Notify::flags.zigzag_record =2;
         if (_devices[i] != nullptr)
         {
             _devices[i]->update();

@@ -10,6 +10,7 @@
 #include "AP_Notify.h"
 #include <AP_GPS/AP_GPS.h>
 #include <AP_HAL/AP_HAL.h>
+#include <GCS_MAVLink/GCS.h>
 
 extern const AP_HAL::HAL& hal;
 
@@ -29,11 +30,17 @@ bool Ltr_PWMLed::init(void)
 	    hal.gpio->pinMode(HAL_GPIO_NUM_GPIOH_11, HAL_GPIOH_OUTPUT);
 	    hal.gpio->pinMode(HAL_GPIO_NUM_GPIOH_12, HAL_GPIOH_OUTPUT);
 	    hal.gpio->pinMode(HAL_GPIO_NUM_GPIOA_7, HAL_GPIOH_OUTPUT); //初始化
+
+	    hal.gpio->pinMode(HAL_GPIO_NUM_GPIOD_13, HAL_GPIOH_OUTPUT); //初始化
+	    hal.gpio->pinMode(HAL_GPIO_NUM_GPIOD_14, HAL_GPIOH_OUTPUT); //初始化
 	    // turn leds off
 	    hal.gpio->write(HAL_GPIO_NUM_GPIOH_10, HAL_GPIOH_LED_OFF);  //PH10----R
 	    hal.gpio->write(HAL_GPIO_NUM_GPIOH_11, HAL_GPIOH_LED_OFF);  //PH11----G
 	    hal.gpio->write(HAL_GPIO_NUM_GPIOH_12, HAL_GPIOH_LED_OFF);  //PH12----B
 	    hal.gpio->write(HAL_GPIO_NUM_GPIOA_7, HAL_GPIOA_IMU_CONT_TEMP_OFF);  //PA7
+
+	    hal.gpio->write(HAL_GPIO_NUM_GPIOD_13, HAL_GPIOD_Lidar_OFF);  //PD13
+	    hal.gpio->write(HAL_GPIO_NUM_GPIOD_14, HAL_GPIOD_Lidar_ON);  //PD14
 	    _counter=0;
 	    ltr_pwmled_init_completed_flag=1;
 	    return 1;
@@ -51,6 +58,23 @@ bool Ltr_PWMLed::init(void)
 *************************************************************************************************************************/
 void Ltr_PWMLed::update(void)
 {
+	//hw_set_rgb(Ltr_PWMLed_Color_BLUE);
+	//gcs().send_text(MAV_SEVERITY_WARNING,"Ltr_PWMLed::update"); //发送自动信息
+
+        hal.gpio->write(HAL_GPIO_NUM_GPIOD_13, HAL_GPIOD_Lidar_ON);  //PD13
+	    hal.gpio->write(HAL_GPIO_NUM_GPIOD_14, HAL_GPIOD_Lidar_ON);  //PD14
+
+  uint16_t rc7_in = RC_Channels::rc_channel(CH_7)->get_radio_in();
+ // gcs().send_text(MAV_SEVERITY_INFO, "ModeZigZag: rc7_in=%f ", (double)rc7_in);
+
+
+ 			    		if(rc7_in>1500)
+ 	 hal.gpio->write(HAL_GPIO_NUM_GPIOD_13, HAL_GPIOD_Lidar_ON);
+
+ 			    		else
+   hal.gpio->write(HAL_GPIO_NUM_GPIOD_13, HAL_GPIOD_Lidar_OFF);
+
+
   if(ltr_pwmled_init_completed_flag)
   {
 	   // reduce update rate from 50hz to 10hz

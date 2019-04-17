@@ -16,6 +16,8 @@
           
          2018-10-25:
 上传ubuntu固件到github仓库：
+代码托管，账号：shuav,密码：hndw666888 
+https://github.com/shuav/Copter_3.6.5  代码网址
           git init
           git add .
           git commit -m ""

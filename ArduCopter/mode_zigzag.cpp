@@ -1,5 +1,14 @@
 #include "Copter.h"
 
+
+/*
+void Copter::ModeZigZag::ModeZigZag(const AP_Proximity& proximity)
+{
+	_proximity(proximity)
+	fly_direction=1;
+}
+*/
+
 /***********************************************************************************************************************
 *函数原型：bool Copter::ZigZag::init(bool ignore_checks)
 *函数功能：AB点函数初始化
@@ -141,9 +150,45 @@ void Copter::ModeZigZag::run()
 
 		    case Zigzag_Auto:
 
+		    	  //获取左前方和右前方障碍物的角度和距离
+
+		    	int8_t i;
+		    	float object__angle_temp,object_distance_temp;
+
+		    	for (i=0;i<8;i++)
+		    	{
+		    	copter.g2.proximity.get_object_angle_and_distance(i,object__angle_temp,object_distance_temp);
+		    	object_angle[i]=object__angle_temp;
+		    	object_distance[i]=object_distance_temp;
+		        gcs().send_text(MAV_SEVERITY_INFO, "object: sector=%f  distance=%f", (double)i, (double)object_distance_temp);
+
+		        if(fly_direction)
+		        {
+		        	//飞行方向顺着机头，利用7，0,1扇区来避障
+		        if(object_distance[7]<object_distance[0]&&object_distance[7]<object_distance[1])
+		        	avoid_direction=1;
+		        else
+		        	avoid_direction=-1;
+		        }
+		        else
+		        {
+		        	//飞行方向顺着机尾， 利用3, 4，5 扇区来避障
+		        			        if(object_distance[5]<object_distance[4]&&object_distance[5]<object_distance[3])
+		        			        	avoid_direction=1;
+		        			        else
+		        			        	avoid_direction=-1;
+
+		        }
+
+		        }
+		    	//zigzag_bearing//根据当前的航向角来决定飞机的前方
+
+
+
+
 
 		    	//躲避障碍物
-
+/*
 		    	    uint16_t rc9_in = RC_Channels::rc_channel(CH_9)->get_radio_in();
 		    		if(rc9_in>1500)
 		    		{
@@ -153,7 +198,7 @@ void Copter::ModeZigZag::run()
 		    		else
 		    			zigzag_waypoint_state.meet_obstacle=0;
 
-
+*/
 
 		    	if(zigzag_auto_complete_state && !zigzag_change_yaw||(zigzag_waypoint_state.meet_obstacle&&!zigzag_waypoint_state.obstacle_flag)) //第一次：zigzag_auto_complete_state=1，zigzag_change_yaw=0;
 		    	{
@@ -405,7 +450,6 @@ void Copter::ModeZigZag::zigzag_auto_control()
 		{
 			zigzag_change_yaw = true;
 			auto_yaw.set_mode(AUTO_YAW_FIXED); //设定自动偏航保持
-
 			auto_yaw.set_fixed_yaw(zigzag_bearing*0.01f,0,0,0);
 			zigzag_waypoint_state.bp_mode = Zigzag_None;
 			zigzag_waypoint_state.index--;
@@ -644,7 +688,7 @@ void Copter::ModeZigZag::zigzag_calculate_next_dest(/*Location_Class& dest*/Vect
 
 	//逆时针旋转当前点到虚拟y轴 A点成为原点（0，0）
 	obstacle_break.z = 0;
-	float dist_obstacle_break = obstacle_break.length();
+	//float dist_obstacle_break = obstacle_break.length();
 	//AB线与X轴的夹角为α，障碍物点与X轴的夹角为β
 	//cos（α+β）=cosαcosβ-sinαsinβ
 	//sin （α+β）=sinαcosβ+cosαsinβ
@@ -657,8 +701,8 @@ void Copter::ModeZigZag::zigzag_calculate_next_dest(/*Location_Class& dest*/Vect
 	switch(zigzag_waypoint_state.obstacle_flag)
 		{
 		case 1:
-			  zigzag_waypoint_state.avoidA_pos.x=obstacle_break.x+fly_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.x-zigzag_waypoint_state.vB_pos.x);
-			  zigzag_waypoint_state.avoidA_pos.y=obstacle_break.y+fly_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.y-zigzag_waypoint_state.vB_pos.y);
+			  zigzag_waypoint_state.avoidA_pos.x=obstacle_break.x+avoid_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.x-zigzag_waypoint_state.vB_pos.x);
+			  zigzag_waypoint_state.avoidA_pos.y=obstacle_break.y+avoid_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.y-zigzag_waypoint_state.vB_pos.y);
 			  next.x = zigzag_waypoint_state.avoidA_pos.x;
 			  next.y = zigzag_waypoint_state.avoidA_pos.y;
 
@@ -674,8 +718,8 @@ void Copter::ModeZigZag::zigzag_calculate_next_dest(/*Location_Class& dest*/Vect
 
 		      break;
 		case 2:
-			   zigzag_waypoint_state.avoidB_pos.x=zigzag_waypoint_state.avoidA_pos.x+fly_direction*front_away/dist_AB*v_A2B.x;
-			   zigzag_waypoint_state.avoidB_pos.y=zigzag_waypoint_state.avoidA_pos.y+fly_direction*front_away/dist_AB*v_A2B.y;
+			   zigzag_waypoint_state.avoidB_pos.x=zigzag_waypoint_state.avoidA_pos.x+avoid_direction*front_away/dist_AB*v_A2B.x;
+			   zigzag_waypoint_state.avoidB_pos.y=zigzag_waypoint_state.avoidA_pos.y+avoid_direction*front_away/dist_AB*v_A2B.y;
 			   next.x = zigzag_waypoint_state.avoidB_pos.x;
 			   next.y = zigzag_waypoint_state.avoidB_pos.y;
 
@@ -683,8 +727,8 @@ void Copter::ModeZigZag::zigzag_calculate_next_dest(/*Location_Class& dest*/Vect
 			  //avoid_point.y=virtual_obstacle.y+front_away;
 			  break;
 		case 3:
-			   zigzag_waypoint_state.avoidC_pos.x=zigzag_waypoint_state.avoidB_pos.x-fly_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.x-zigzag_waypoint_state.vB_pos.x);
-			   zigzag_waypoint_state.avoidC_pos.y=zigzag_waypoint_state.avoidB_pos.y-fly_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.y-zigzag_waypoint_state.vB_pos.y);
+			   zigzag_waypoint_state.avoidC_pos.x=zigzag_waypoint_state.avoidB_pos.x-avoid_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.x-zigzag_waypoint_state.vB_pos.x);
+			   zigzag_waypoint_state.avoidC_pos.y=zigzag_waypoint_state.avoidB_pos.y-avoid_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.y-zigzag_waypoint_state.vB_pos.y);
 			   next.x = zigzag_waypoint_state.avoidC_pos.x;
 			   next.y = zigzag_waypoint_state.avoidC_pos.y;
 

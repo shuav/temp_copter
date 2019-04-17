@@ -101,7 +101,7 @@ void Copter::init_ardupilot()
     winch_init();
 
     //初始化通知系统，主要运行RGBLED函数的初始化-----initialise notify system
-    notify.init(true);
+    //notify.init(true);
     notify_flight_mode();
 
     //初始化电池检测系统-------------------------initialise battery monitor
@@ -184,6 +184,8 @@ void Copter::init_ardupilot()
     // Do GPS init
     gps.set_log_gps_bit(MASK_LOG_GPS);
     gps.init(serial_manager);
+
+
 
     init_compass(); //罗盘初始化
 
@@ -305,6 +307,8 @@ void Copter::init_ardupilot()
         enable_motor_output();
     }
 
+
+
     // disable safety if requested
     BoardConfig.init_safety();
      // 只支持4 6 8轴
@@ -327,7 +331,7 @@ void Copter::init_ardupilot()
     copter.ap.rc_override_enable = true;
     
     hal.console->printf("\nReady to FLY ");
-
+    notify.init(true);
     //标志初始化已经完成------------flag that initialisation has completed
     ap.initialised = true;
 }

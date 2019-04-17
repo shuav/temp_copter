@@ -17,6 +17,10 @@
 #define HAL_GPIO_NUM_GPIOH_12  83    //定义引脚PH12
 #define HAL_GPIO_NUM_GPIOA_7  84    //定义引脚PA7
 
+#define HAL_GPIO_NUM_GPIOD_13  54  //定义引脚PD13
+#define HAL_GPIO_NUM_GPIOD_14  55  //定义引脚PD14
+//控制激光的启动
+
 #define HAL_GPIOH_INPUT  0           //定义GPIO是输入模式
 #define HAL_GPIOH_OUTPUT 1           //定义GPIO是输出模式
 
@@ -26,6 +30,10 @@
 
 #define HAL_GPIOH_LED_ON       0     //点亮LED
 #define HAL_GPIOH_LED_OFF      1    //关闭LED
+
+#define HAL_GPIOD_Lidar_ON       1     //打开激光雷达
+#define HAL_GPIOD_Lidar_OFF       0     //关闭激光雷达
+
 
 #define HAL_GPIOA_IMU_CONT_TEMP_ON       1     //关闭
 #define HAL_GPIOA_IMU_CONT_TEMP_OFF      0    //关闭LED

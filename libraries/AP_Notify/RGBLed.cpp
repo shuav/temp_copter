@@ -514,6 +514,7 @@ void RGBLed::update_colours(void)
 // at 50Hz
 void RGBLed::update()
 {
+	//gcs().send_text(MAV_SEVERITY_WARNING,"RGBLed::update"); //发送自动信息
     if (!pNotify->_rgb_led_override)
     {
         update_colours();
