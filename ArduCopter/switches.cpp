@@ -165,6 +165,8 @@ void Copter::read_multiaux_switches()
         	{
         		gcs().send_text(MAV_SEVERITY_WARNING, "Record B point");
         		AP_Notify::flags.zigzag_record = 81; // 3^4 = 81 means flash yellow 4 seconds
+
+        		AP_Notify::flags.avoid_course=2;//闪蓝灯 板子灯
         	}
     		break;
     	case 6:
@@ -177,6 +179,8 @@ void Copter::read_multiaux_switches()
         	{
         		gcs().send_text(MAV_SEVERITY_WARNING, "Record A point");
         		AP_Notify::flags.zigzag_record = 16; // 2^4 = 16 means flash blue 4 seconds
+
+        		AP_Notify::flags.avoid_course=1;//闪红灯 板子灯
         	}
 
     		break;
@@ -924,6 +928,7 @@ void Copter::do_aux_switch_function(int8_t ch_function, uint8_t ch_flag)
      					{
      						gcs().send_text(MAV_SEVERITY_WARNING, "Record A point");
      						AP_Notify::flags.zigzag_record = 16; // 2^4 = 16 means flash blue 4 seconds
+     						AP_Notify::flags.avoid_course=1;//闪红灯 板子灯
      					}
      					   //init_arm_motors(false);
      					   break;
@@ -937,6 +942,7 @@ void Copter::do_aux_switch_function(int8_t ch_function, uint8_t ch_flag)
      					{
      						gcs().send_text(MAV_SEVERITY_WARNING, "Record B point");
      						AP_Notify::flags.zigzag_record = 81; // 3^4 = 81 means flash yellow 4 seconds
+     						AP_Notify::flags.avoid_course=2;//闪蓝灯 板子灯
      					}
      					  break;
      		   }

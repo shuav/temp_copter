@@ -17,7 +17,6 @@ void Copter::ModeZigZag::ModeZigZag(const AP_Proximity& proximity)
 *备注信息：ZigZag_init - initialise stabilize controller
 *************************************************************************************************************************/
 bool Copter::ModeZigZag::init(bool ignore_checks)
-
 {
 
     if (!(motors->armed()) ) //没解锁就会立即退出初始化的过程
@@ -154,32 +153,51 @@ void Copter::ModeZigZag::run()
 
 		    	int8_t i;
 		    	float object__angle_temp,object_distance_temp;
-
+               //读取激光雷达的数据
 		    	for (i=0;i<8;i++)
 		    	{
 		    	copter.g2.proximity.get_object_angle_and_distance(i,object__angle_temp,object_distance_temp);
+		    	if(object__angle_temp==0)
+		    	{
+		    		object__angle_temp=133;//获得的数据为0，说明障碍物很远
+		    	}
+
 		    	object_angle[i]=object__angle_temp;
 		    	object_distance[i]=object_distance_temp;
-		        gcs().send_text(MAV_SEVERITY_INFO, "object: sector=%f  distance=%f", (double)i, (double)object_distance_temp);
-
-		        if(fly_direction)
+		       // gcs().send_text(MAV_SEVERITY_INFO, "object: sector=%f  distance=%f", (double)i, (double)object_distance_temp);
+		    	}
+		        switch(fly_direction)
 		        {
-		        	//飞行方向顺着机头，利用7，0,1扇区来避障
+		        case 1:
+
+				if(object_distance[7]<3.5||object_distance[0]<3||object_distance[1]<3.5)
+				    {	//飞行方向顺着机头，利用7，0,1扇区来避障
 		        if(object_distance[7]<object_distance[0]&&object_distance[7]<object_distance[1])
 		        	avoid_direction=1;
 		        else
 		        	avoid_direction=-1;
-		        }
-		        else
-		        {
+
+		        zigzag_waypoint_state.meet_obstacle=1;
+		            }
+
+				else
+	                zigzag_waypoint_state.meet_obstacle=0;
+		        break;
+
+		        case -1:
 		        	//飞行方向顺着机尾， 利用3, 4，5 扇区来避障
-		        			        if(object_distance[5]<object_distance[4]&&object_distance[5]<object_distance[3])
+		        	if(object_distance[3]<3.5||object_distance[7]<3||object_distance[5]<3.5)
+		        	   {
+		        			        if(object_distance[3]<object_distance[4]&&object_distance[5]<object_distance[3])
 		        			        	avoid_direction=1;
 		        			        else
 		        			        	avoid_direction=-1;
-
-		        }
-
+		        			        zigzag_waypoint_state.meet_obstacle=1;
+		        	    }
+		        	else
+		        		 zigzag_waypoint_state.meet_obstacle=0;
+		         break;
+		        default:break;
 		        }
 		    	//zigzag_bearing//根据当前的航向角来决定飞机的前方
 
@@ -202,6 +220,10 @@ void Copter::ModeZigZag::run()
 
 		    	if(zigzag_auto_complete_state && !zigzag_change_yaw||(zigzag_waypoint_state.meet_obstacle&&!zigzag_waypoint_state.obstacle_flag)) //第一次：zigzag_auto_complete_state=1，zigzag_change_yaw=0;
 		    	{
+
+		    		AP_Notify::flags.avoid_course++;
+		    		if(AP_Notify::flags.avoid_course>4)
+		    			AP_Notify::flags.avoid_course=0;
 
 		    		//没有遇见障碍物，航线不变
 		    	    if(!zigzag_waypoint_state.meet_obstacle)
@@ -683,7 +705,7 @@ void Copter::ModeZigZag::zigzag_calculate_next_dest(/*Location_Class& dest*/Vect
 	//遇到障碍物，重新规划航线
 	Vector3f obstacle_break=inertial_nav.get_position();
 	Vector3f virtual_obstacle,avoid_point;
-	float right_away=500,front_away=500;//单位是cm
+	float right_away=200,front_away=200;//单位是cm
 
 
 	//逆时针旋转当前点到虚拟y轴 A点成为原点（0，0）

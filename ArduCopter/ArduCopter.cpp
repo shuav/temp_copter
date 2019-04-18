@@ -89,7 +89,7 @@
   and the maximum time they are expected to take (in microseconds)
  */
 const AP_Scheduler::Task Copter::scheduler_tasks[] = {
-    SCHED_TASK(rc_loop,              100,    1),  //遥控器函数 130 测试用
+    SCHED_TASK(rc_loop,              100,    130),  //遥控器函数 130 测试用
     SCHED_TASK(throttle_loop,         50,     75),  //更新油门函数
     SCHED_TASK(update_GPS,            50,    200),  //GPS数据更新
 #if OPTFLOW == ENABLED

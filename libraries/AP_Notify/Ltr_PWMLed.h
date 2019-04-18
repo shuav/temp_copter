@@ -17,8 +17,21 @@
 #define HAL_GPIO_NUM_GPIOH_12  83    //定义引脚PH12
 #define HAL_GPIO_NUM_GPIOA_7  84    //定义引脚PA7
 
+
+
+#define HAL_GPIO_NUM_GPIOE_14  50  //定义引脚PD13
+#define HAL_GPIO_NUM_GPIOA_10  51  //定义引脚PD14
+#define HAL_GPIO_NUM_GPIOE_11  52  //定义引脚PD13
+#define HAL_GPIO_NUM_GPIOE_9  53  //定义引脚PD14
+
+
 #define HAL_GPIO_NUM_GPIOD_13  54  //定义引脚PD13
 #define HAL_GPIO_NUM_GPIOD_14  55  //定义引脚PD14
+
+
+
+
+
 //控制激光的启动
 
 #define HAL_GPIOH_INPUT  0           //定义GPIO是输入模式

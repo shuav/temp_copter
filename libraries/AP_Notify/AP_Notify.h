@@ -112,6 +112,8 @@ public:
         //增加避障碍指示灯
         uint32_t avoid_record:3;           //0=没有进入避障区域，在避障区域
         uint32_t compass_cal_status : 3;    // 1 if a compass calibration status
+
+        uint8_t avoid_course;//增加避障碍过程指示灯
     };
 
     /// notify_events_type - bitmask of active events.

@@ -33,20 +33,38 @@ bool Ltr_PWMLed::init(void)
 
 	    hal.gpio->pinMode(HAL_GPIO_NUM_GPIOD_13, HAL_GPIOH_OUTPUT); //初始化
 	    hal.gpio->pinMode(HAL_GPIO_NUM_GPIOD_14, HAL_GPIOH_OUTPUT); //初始化
+
+	    hal.gpio->pinMode(HAL_GPIO_NUM_GPIOE_14, HAL_GPIOH_OUTPUT); //初始化
+	  	hal.gpio->pinMode(HAL_GPIO_NUM_GPIOA_10, HAL_GPIOH_OUTPUT); //初始化
+	    hal.gpio->pinMode(HAL_GPIO_NUM_GPIOE_11, HAL_GPIOH_OUTPUT); //初始化
+	    hal.gpio->pinMode(HAL_GPIO_NUM_GPIOE_9, HAL_GPIOH_OUTPUT); //初始化
+
+
+
+
+
 	    // turn leds off
 	    hal.gpio->write(HAL_GPIO_NUM_GPIOH_10, HAL_GPIOH_LED_OFF);  //PH10----R
 	    hal.gpio->write(HAL_GPIO_NUM_GPIOH_11, HAL_GPIOH_LED_OFF);  //PH11----G
 	    hal.gpio->write(HAL_GPIO_NUM_GPIOH_12, HAL_GPIOH_LED_OFF);  //PH12----B
 	    hal.gpio->write(HAL_GPIO_NUM_GPIOA_7, HAL_GPIOA_IMU_CONT_TEMP_OFF);  //PA7
 
+
+
+	    hal.gpio->write(HAL_GPIO_NUM_GPIOE_14, HAL_GPIOD_Lidar_ON);  //PD13
+	    hal.gpio->write(HAL_GPIO_NUM_GPIOA_10, HAL_GPIOD_Lidar_ON);  //PD14
+	    hal.gpio->write(HAL_GPIO_NUM_GPIOE_11, HAL_GPIOD_Lidar_ON);  //PD13
+	    hal.gpio->write(HAL_GPIO_NUM_GPIOE_9, HAL_GPIOD_Lidar_ON);  //PD14
+
 	    hal.gpio->write(HAL_GPIO_NUM_GPIOD_13, HAL_GPIOD_Lidar_OFF);  //PD13
 	    hal.gpio->write(HAL_GPIO_NUM_GPIOD_14, HAL_GPIOD_Lidar_ON);  //PD14
+
+
 	    _counter=0;
 	    ltr_pwmled_init_completed_flag=1;
 	    return 1;
 
 }
-
 
 
 /***********************************************************************************************************************
@@ -60,9 +78,14 @@ void Ltr_PWMLed::update(void)
 {
 	//hw_set_rgb(Ltr_PWMLed_Color_BLUE);
 	//gcs().send_text(MAV_SEVERITY_WARNING,"Ltr_PWMLed::update"); //发送自动信息
+/*
+              hal.gpio->write(HAL_GPIO_NUM_GPIOD_13, HAL_GPIOD_Lidar_ON);  //PD13
+	          hal.gpio->write(HAL_GPIO_NUM_GPIOD_14, HAL_GPIOD_Lidar_ON);  //PD14
 
-        hal.gpio->write(HAL_GPIO_NUM_GPIOD_13, HAL_GPIOD_Lidar_ON);  //PD13
-	    hal.gpio->write(HAL_GPIO_NUM_GPIOD_14, HAL_GPIOD_Lidar_ON);  //PD14
+	            hal.gpio->write(HAL_GPIO_NUM_GPIOE_14, HAL_GPIOD_Lidar_ON);  //PD13
+	    	    hal.gpio->write(HAL_GPIO_NUM_GPIOA_10, HAL_GPIOD_Lidar_ON);  //PD14
+	    	    hal.gpio->write(HAL_GPIO_NUM_GPIOE_11, HAL_GPIOD_Lidar_ON);  //PD13
+	    	    hal.gpio->write(HAL_GPIO_NUM_GPIOE_9, HAL_GPIOD_Lidar_ON);  //PD14
 
   uint16_t rc7_in = RC_Channels::rc_channel(CH_7)->get_radio_in();
  // gcs().send_text(MAV_SEVERITY_INFO, "ModeZigZag: rc7_in=%f ", (double)rc7_in);
@@ -74,7 +97,7 @@ void Ltr_PWMLed::update(void)
  			    		else
    hal.gpio->write(HAL_GPIO_NUM_GPIOD_13, HAL_GPIOD_Lidar_OFF);
 
-
+*/
   if(ltr_pwmled_init_completed_flag)
   {
 	   // reduce update rate from 50hz to 10hz
@@ -102,8 +125,115 @@ void Ltr_PWMLed::update(void)
 	    {
 	        _counter4 = 0;
 	    }
+//增加AB打点 躲避障碍物指示灯
 
-		if (AP_Notify::flags.initialising)
+	    switch(AP_Notify::flags.avoid_course)
+	    {
+	    case 0:
+	    	switch(_counter2)
+	    		        {
+	    		            case 0:
+	    		            case 2:
+	    		            case 4:
+	    		            case 6:
+	    		            case 8:
+	    		            	hw_set_rgb(Ltr_PWMLed_Color_GREEN);
+	    		                break;
+	    		            case 1:
+	    		            case 3:
+	    		            case 5:
+	    		            case 7:
+	    		            case 9:
+	    		            	hw_set_rgb(Ltr_PWMLed_Color_ALLOFF);
+	    		                break;
+	    		        }
+	    	break;
+
+	    	case 1:
+	    		  switch(_counter2)
+	    		    	 {
+	    		    	case 0:
+	    		    	case 2:
+	    		    	case 4:
+	    		    	case 6:
+	    		    	case 8:
+	    		    	hw_set_rgb(Ltr_PWMLed_Color_RED);
+	    		    	break;
+	    		    	case 1:
+	    		    	case 3:
+	    		    	case 5:
+	    		    	case 7:
+	    		    	case 9:
+	    		    	hw_set_rgb(Ltr_PWMLed_Color_ALLOFF);
+	    		    	break;
+	    		    		 }
+	    		    	break;
+
+	    	case 2:
+	    		   switch(_counter2)
+	    		    	    	 {
+	    		    	    	 case 0:
+	    		    	    	 case 2:
+	    		    	    	 case 4:
+	    		    	    	 case 6:
+	    		    	    	 case 8:
+	    		    	    	hw_set_rgb(Ltr_PWMLed_Color_BLUE);
+	    		    	    	  break;
+	    		    	    	 case 1:
+	    		    	    	 case 3:
+	    		    	    	 case 5:
+	    		    	    	 case 7:
+	    		    	    	 case 9:
+	    		    	    		 hw_set_rgb(Ltr_PWMLed_Color_ALLOFF);
+	    		    	    		break;
+	    		    	    		 }
+	    		    	    		    	break;
+
+	    	case 3:
+	    		   	    switch(_counter2)
+	    		   	    		 {
+	    		   	    		 case 0:
+	    		   	    		 case 2:
+	    		   	    		 case 4:
+	    		   	    		 case 6:
+	    		   	    		 case 8:
+	    		   	    		 hw_set_rgb(Ltr_PWMLed_Color_YELLOW);
+	    		   	    		 break;
+	    		   	    		 case 1:
+	    		   	    		 case 3:
+	    		   	    		 case 5:
+	    		   	    		 case 7:
+	    		   	    		 case 9:
+	    		   	    		 hw_set_rgb(Ltr_PWMLed_Color_ALLOFF);
+	    		   	    		 break;
+	    		   	    		  }
+
+
+	    		   	 case 4:
+	    		   	 	    	switch(_counter2)
+	    		   	 	    		  {
+	    		   	 	    		   case 0:
+	    		   	 	    		   case 2:
+	    		   	 	    		   case 4:
+	    		   	 	    		   case 6:
+	    		   	 	    		   case 8:
+	    		   	 	    	       hw_set_rgb(Ltr_PWMLed_Color_PURPLE);
+	    		   	 	    		   break;
+	    		   	 	    		   case 1:
+	    		   	 	    		   case 3:
+	    		   	 	    		   case 5:
+	    		   	 	    		   case 7:
+	    		   	 	    		   case 9:
+	    		   	 	    	       hw_set_rgb(Ltr_PWMLed_Color_ALLOFF);
+	    		   	 	    		   break;
+	    		   	 	    		   	}
+	    		   	    		   	    break;
+
+	    }
+
+
+
+	/*	if (AP_Notify::flags.initialising)
 		{
 
 	        // blink arming and gps leds at 5hz
@@ -349,7 +479,7 @@ void Ltr_PWMLed::update(void)
 		            }
 		}
 
-
+*/
   }
   else
   {
