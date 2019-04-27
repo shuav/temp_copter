@@ -509,9 +509,9 @@ void AP_Baro::init(void)
         break;
  //添加自己的代码
     case AP_BoardConfig::PX4_BOARD_FMUV5:
-    	hal.console->printf("%%%%%%%%%%\r\n");
-    	ADD_BACKEND(AP_BARO_SPL06_001::probe(*this,std::move(hal.spi->get_device(HAL_BARO_SPL06_001_NAME))));
-    	hal.console->printf("%%%%%%%%%%\r\n");
+//    	hal.console->printf("%%%%%%%%%%\r\n");
+//    	ADD_BACKEND(AP_BARO_SPL06_001::probe(*this,std::move(hal.spi->get_device(HAL_BARO_SPL06_001_NAME))));
+//    	hal.console->printf("%%%%%%%%%%\r\n");
         ADD_BACKEND(AP_Baro_MS56XX::probe(*this,std::move(hal.spi->get_device(HAL_BARO_MS5611_NAME))));
         break;
         

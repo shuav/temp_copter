@@ -570,9 +570,10 @@ bool AP_Arming::pre_arm_checks(bool report)
         return true;
     }
 #endif
-
-    return hardware_safety_check(report)
-        &  barometer_checks(report)
+//关掉硬件开关检测，测试用，风险，要当心
+   // return hardware_safety_check(report)
+    //    &
+ return  barometer_checks(report)
         &  ins_checks(report)
         &  compass_checks(report)
         &  gps_checks(report)

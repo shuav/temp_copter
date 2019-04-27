@@ -1,8 +1,7 @@
+
 #include <AP_HAL/AP_HAL.h>
 #include "AC_WPNav.h"
-
 extern const AP_HAL::HAL& hal;
-
 const AP_Param::GroupInfo AC_WPNav::var_info[] = {
     // index 0 was used for the old orientation matrix
 
@@ -232,6 +231,8 @@ bool AC_WPNav::set_wp_destination_NED(const Vector3f& destination_NED)
     return set_wp_destination(Vector3f(destination_NED.x * 100.0f, destination_NED.y * 100.0f, -destination_NED.z * 100.0f), false);
 }
 
+//测试用
+Vector3f destination_temp;
 /// set_origin_and_destination - set origin and destination waypoints using position vectors (distance from home in cm)
 ///     terrain_alt should be true if origin.z and destination.z are desired altitudes above terrain (false if these are alt-above-ekf-origin)
 ///     returns false on failure (likely caused by missing terrain data)
@@ -242,6 +243,9 @@ bool AC_WPNav::set_wp_origin_and_destination(const Vector3f& origin, const Vecto
     _destination = destination;
     _terrain_alt = terrain_alt;
     Vector3f pos_delta = _destination - _origin;
+
+    //测试用
+    destination_temp=_destination;
 
     _track_length = pos_delta.length(); // get track length
     _track_length_xy = safe_sqrt(sq(pos_delta.x)+sq(pos_delta.y));  // get horizontal track length (used to decide if we should update yaw)
@@ -488,6 +492,9 @@ bool AC_WPNav::advance_wp_target_along_track(float dt)
 *修改作者：cihang_uav
 *备注信息：advance_wp_target_along_track - move target location along track from origin to destination
 *************************************************************************************************************************/
+//距离 测试用
+float distant_temp=0;
+
 
 bool AC_WPNav::zigzag_advance_wp_target_along_track(float dt)
 {
@@ -622,6 +629,20 @@ bool AC_WPNav::zigzag_advance_wp_target_along_track(float dt)
             }else{
                 // regular waypoints also require the copter to be within the waypoint radius
                 Vector3f dist_to_dest = (curr_pos - Vector3f(0,0,terr_offset)) - _destination;
+
+                //距离打印位置测试用
+               // distant_temp++;
+                //if(distant_temp>1000)
+                //{
+                //	distant_temp=0;
+                	//gcs().send_text(MAV_SEVERITY_INFO, "distant_temp: distant_temp=%f ", (double)dist_to_dest.length());
+
+                //}
+
+
+               // dist_to_dest.z=0;//测试用，Z轴归零 有风险，当心
+                distant_temp=dist_to_dest.length();
+
                 if( dist_to_dest.length() <= _wp_radius_cm ) {
                     _flags.reached_destination = true;
                 }

@@ -1319,6 +1319,8 @@ public:
 		   int8_t  obstacle_flag;//增加遇见障碍物标志量
 		   int8_t meet_obstacle;
 
+
+
 		   //增加3个避障航点
 		   Vector3f vC_pos;
 		   Vector3f avoidA_pos;
@@ -1330,9 +1332,13 @@ public:
 		//避障用变量
 		Vector3f last_location;
 		Vector3f next_location;
-		int8_t fly_direction,avoid_direction;
+		int8_t fly_direction,avoid_direction,object_detect_number;
+		int8_t fly_dir_lock=0;//飞行方向锁定标志位
+
+
 		float object_angle[8],object_distance[8];
 		//const AP_Proximity & _object;
+		 // Vector3f next;//改成全局变量，测试用 风险，当心
 
 		   void zigzag_manual_control(void);
 			void zigzag_auto_control(void);

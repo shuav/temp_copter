@@ -20,16 +20,24 @@ struct {
 *修改作者：cihang_uav
 *备注信息：ZigZag_init - initialise stabilize controller
 *************************************************************************************************************************/
-//int temp_loop=0;
+
+//测试用
+/*
+int temp_loop=0;
+float object_angle[8];
+float object_distance[8];
+
+int object_detect_number=0;
+*/
 void Copter::read_control_switch()
 {
 	//测试激光传感器用
-	/*
+/*
 	int8_t i;
       float object__angle_temp,object_distance_temp;
 
 temp_loop++;
-if(temp_loop>9000)
+if(temp_loop>300)
 {
 	temp_loop=0;
 	   for (i=0;i<8;i++)
@@ -39,7 +47,121 @@ if(temp_loop>9000)
 			    	}
 
 }
+
+
+
+
 */
+/*
+
+	//获取左前方和右前方障碍物的角度和距离
+			    	int8_t i, fly_direction=0,meet_obstacle=0;
+			    	int avoid_direction=0;
+			    	float object__angle_temp,object_distance_temp;
+	               //读取激光雷达的数据
+
+			    	temp_loop++;
+			    	if(temp_loop>300)
+			    	{
+			    		temp_loop=0;
+
+
+			    	for (i=0;i<8;i++)
+			    	{
+			    	copter.g2.proximity.get_object_angle_and_distance(i,object__angle_temp,object_distance_temp);
+			    	if(object__angle_temp<=0.3)
+			    	{
+			    		object__angle_temp=133;//获得的数据很小，说明障碍物很远
+			    	}
+
+			    	object_angle[i]=object__angle_temp;
+			    	object_distance[i]=object_distance_temp;
+			         gcs().send_text(MAV_SEVERITY_INFO, "object: sector=%f  distance=%f", (double)i, (double)object_distance_temp);
+			    	}
+			    	//飞行方向在后面计算，是否有问题，风险，要当心！！！
+			    	fly_direction=1;//测试用 风险，要当心！
+			        switch(fly_direction)
+			        {
+			        case 1:
+
+					if(object_distance[7]<0.5||object_distance[0]<0.5||object_distance[1]<0.5)
+					    {	//飞行方向顺着机头，利用7，0,1扇区来避障
+			        if(object_distance[7]<object_distance[0]&&object_distance[7]<object_distance[1])
+			        	avoid_direction=1;
+			        else
+			        	avoid_direction=-1;
+
+			        meet_obstacle=1;
+			        object_detect_number=0;
+			            }
+
+					else
+					{
+						object_detect_number++;
+						//没有障碍物探测次数大于临界值，才确定没有碰到障碍物，因为雷达存在漏检情况
+						if(object_detect_number>2)
+						{
+							object_detect_number=0;
+		                meet_obstacle=0;
+						}
+					}
+			        break;
+
+			        case -1:
+			        	//飞行方向顺着机尾， 利用3, 4，5 扇区来避障
+			        	if(object_distance[3]<0.5||object_distance[4]<0.5||object_distance[5]<0.5)
+			        	   {
+			        			        if(object_distance[3]<object_distance[4]&&object_distance[3]<object_distance[5])
+			        			        	avoid_direction=1;
+			        			        else
+			        			        	avoid_direction=-1;
+			        			         meet_obstacle=1;
+			        			        object_detect_number=0;
+			        	    }
+
+			        	else
+			        				{
+			        					object_detect_number++;
+			        					//没有障碍物探测次数大于临界值，才确定没有碰到障碍物，因为雷达存在漏检情况
+			        					if(object_detect_number>2)
+			        					{
+			        						object_detect_number=0;
+			        	                    meet_obstacle=0;
+			        					}
+			        				}
+			         break;
+			        default:break;
+			        }
+
+
+
+			        gcs().send_text(MAV_SEVERITY_INFO, "object: avoid_direction=%f", (double)avoid_direction);
+
+			    	if(meet_obstacle)
+			    			{
+			    			gcs().send_text(MAV_SEVERITY_WARNING, "There is a obstacle in the front");
+			    		    AP_Notify::flags.zigzag_record = 16;
+			    			}
+
+			    			else
+			    			{
+			    				gcs().send_text(MAV_SEVERITY_WARNING, "We are away from obstacle  ");
+			    			    AP_Notify::flags.zigzag_record = 16;
+			    				}
+
+
+			    	}
+
+
+*/
+
+
+
+
+
+
+
+
     if (g.flight_mode_chan <= 0) {
         // no flight mode channel
         return;

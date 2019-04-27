@@ -120,7 +120,7 @@
 // Proximity sensor
 //
 #ifndef PROXIMITY_ENABLED
- # define PROXIMITY_ENABLED ENABLED
+ # define PROXIMITY_ENABLED  ENABLED
 #endif
 
 #ifndef MAV_SYSTEM_ID

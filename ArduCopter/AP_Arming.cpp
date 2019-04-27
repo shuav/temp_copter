@@ -486,7 +486,7 @@ bool AP_Arming_Copter::pre_arm_proximity_check(bool display_failure)
     float angle_deg, distance;
     if (copter.avoid.proximity_avoidance_enabled() && copter.g2.proximity.get_closest_object(angle_deg, distance)) {
         // display error if something is within 60cm
-        if (distance <= 0.6f) {
+        if (distance <= 0.3f) {  //又0.6改为0.3，测试用
             check_failed(ARMING_CHECK_PARAMETERS, display_failure, "Proximity %d deg, %4.2fm", (int)angle_deg, (double)distance);
             return false;
         }
