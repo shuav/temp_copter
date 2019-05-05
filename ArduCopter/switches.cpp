@@ -22,15 +22,31 @@ struct {
 *************************************************************************************************************************/
 
 //测试用
-/*
+
 int temp_loop=0;
+/*
 float object_angle[8];
 float object_distance[8];
 
 int object_detect_number=0;
 */
+
+//extern float angle_lidarA2,distance_lidarA2;
+extern float lidarA2_test[9];
 void Copter::read_control_switch()
 {
+
+	temp_loop++;
+	if(temp_loop>130)
+	{
+		temp_loop=0;
+	  //gcs().send_text(MAV_SEVERITY_INFO, "object: angle=%f  distance=%f", (double)angle_lidarA2,(double)distance_lidarA2);
+	gcs().send_text(MAV_SEVERITY_INFO, "angle_left_front=%f  distant_lf=%f", (double)lidarA2_test[0],(double)lidarA2_test[1]);
+	gcs().send_text(MAV_SEVERITY_INFO, "angle_right_front=%f  distant_rf=%f", (double)lidarA2_test[2],(double)lidarA2_test[3]);
+	gcs().send_text(MAV_SEVERITY_INFO, "avoid_distance=%f  avoid_directon=%f", (double)lidarA2_test[4],(double)lidarA2_test[5]);
+	gcs().send_text(MAV_SEVERITY_INFO, "object_distance=%f ", (double)lidarA2_test[6]);
+	}
+
 	//测试激光传感器用
 /*
 	int8_t i;

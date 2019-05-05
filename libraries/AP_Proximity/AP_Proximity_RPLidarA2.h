@@ -113,6 +113,27 @@ private:
     uint8_t _sync_error ;
     uint16_t _byte_count;
 
+    //新增 改动
+	float angle_left_front;
+	float distant_left_front;
+	uint8_t point_left_front_find=0;
+    float angle_right_front;
+    float distant_right_front;
+    float L_left_front, L_right_front;
+
+    float angle_left_back;
+    float distant_left_back;
+    uint8_t point_left_back_find=0;
+    float angle_right_back;
+    float distant_right_back;
+    float L_left_back, L_right_back;
+
+
+
+
+
+
+
     // request related variables
     enum ResponseType _response_type;         ///< response from the lidar
     enum rp_state _rp_state;

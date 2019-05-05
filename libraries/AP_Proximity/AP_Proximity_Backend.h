@@ -56,6 +56,9 @@ public:
     // get distance and angle to closest object (used for pre-arm check)
     //   returns true on success, false if no valid readings
     bool get_closest_object(float& angle_deg, float &distance) const;
+   //增加的函数
+    void get_object_info(float &distante_obj, float &avoid_dir,float& avoid_dis) const;
+
 
     // get number of objects, angle and distance - used for non-GPS avoidance
     uint8_t get_object_count() const;
@@ -98,6 +101,9 @@ protected:
     float _angle[PROXIMITY_SECTORS_MAX];            // angle to closest object within each sector
     float _distance[PROXIMITY_SECTORS_MAX];         // distance to closest object within each sector
     bool _distance_valid[PROXIMITY_SECTORS_MAX];    // true if a valid distance received for each sector
+
+    //增加障碍物信息数据
+    float avoid_distance, avoid_direction, distante_object;
 
     // fence boundary
     Vector2f _sector_edge_vector[PROXIMITY_SECTORS_MAX];    // vector for right-edge of each sector, used to speed up calculation of boundary

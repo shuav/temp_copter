@@ -103,6 +103,9 @@ public:
     //   returns true on success, false if no valid readings
     bool get_closest_object(float& angle_deg, float &distance) const;
 
+    //增加的函数
+    void get_object_info(float &distante_obj, float &avoid_dir,float& avoid_dis) const;
+
     // get number of objects, angle and distance - used for non-GPS avoidance
     uint8_t get_object_count() const;
     bool get_object_angle_and_distance(uint8_t object_number, float& angle_deg, float &distance) const;
@@ -141,6 +144,9 @@ public:
     bool sensor_enabled() const;
     bool sensor_failed() const;
 
+
+    int test_proximity=1;//测试用 风险，当心！！！
+
 private:
     static AP_Proximity *_singleton;
     Proximity_State state[PROXIMITY_MAX_INSTANCES];
@@ -159,4 +165,6 @@ private:
 
     void detect_instance(uint8_t instance);
     void update_instance(uint8_t instance);  
+
+
 };

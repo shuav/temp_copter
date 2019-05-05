@@ -115,12 +115,10 @@ Vector3f next_printf;//测试用
 
 int state_zigzag=0;//测试用，zigzag状态变量
 
+
 void Copter::ModeZigZag::run()
 {
 	//如果没有自动解锁，电机没有使能，设置油门值为零，并且立即退出------ if not auto armed or motors not enabled set throttle to zero and exit immediately
-
-
-
 
 
 	if (!motors->armed() || !ap.auto_armed || !motors->get_interlock() || ap.land_complete)
@@ -162,6 +160,70 @@ void Copter::ModeZigZag::run()
 
 		    case Zigzag_Auto:
 
+		    	float closest_angle,closest_distance;
+		    	float avoid_direction_temp;
+		    	float  distante_object;
+		    	time_Lidar++;
+		    	//20Hz处理一下雷达数据
+		    	if(time_Lidar==20)
+		    	{
+		    		 copter.g2.proximity.get_closest_object(closest_angle,closest_distance);
+
+		    		 //获取障碍物距离，躲避障碍物的方向和距离
+		    		 copter.g2.proximity.get_object_info(distante_object,Lidar_avoid_distance, Lidar_avoid_direction);
+
+		    		 //距离障碍物太近，发生危险，退出自动模式
+		    		if(closest_distance<1.3&&closest_distance>0.7)
+		    		{
+		    		zigzag_mode = Zigzag_Manual;
+		    		AP_Notify::flags.zigzag_record_mode=0;
+		    		gcs().send_text(MAV_SEVERITY_WARNING,"Zigzag manual closest_distance"); //发送自动信息
+		    		zigzag_auto_complete_state = false;
+		    		 #if 1
+		    		 loiter_nav->init_target();
+		    		 #else
+		    		 poshold_init(true);
+		    		#endif
+		    		zigzag_auto_stop();
+		    		return;
+		    		}
+
+
+		    		time_Lidar=0;
+
+
+		    		if(distante_object<8&&distante_object>5&&!zigzag_waypoint_state.meet_obstacle)
+		    		{
+		    			avoid_distance_sum+=Lidar_avoid_distance;
+		    			avoid_directon_sum+=Lidar_avoid_direction;
+		    			time_data_handle++;
+
+		    			//防止数据溢出
+		    			if(time_data_handle>1000)
+		    			{
+		    				avoid_distance_sum=0;
+		    				avoid_directon_sum=0;
+		    				time_data_handle=0;
+		    			}
+		    		}
+
+		    		//障碍物小于5m,计算避障距离和方向，障碍物标志位置位 只能计算一次
+		    		if(distante_object<5&&!zigzag_waypoint_state.meet_obstacle)
+		    		{
+		    			zigzag_waypoint_state.meet_obstacle=1;
+		    			Lidar_avoid_distance=avoid_distance_sum/time_data_handle;
+		    			avoid_direction_temp=avoid_distance_sum/time_data_handle;
+		    			if(avoid_direction_temp>0)
+		    				Lidar_avoid_direction=1;
+		    			else
+		    				Lidar_avoid_direction=-1;
+
+		    			time_data_handle=1;
+		    		}
+
+
+		    	}
+		    	/*
 		    	  //获取左前方和右前方障碍物的角度和距离
 		    	int8_t i;
 		    	float object__angle_temp,object_distance_temp;
@@ -273,7 +335,7 @@ void Copter::ModeZigZag::run()
 		    	//zigzag_bearing//根据当前的航向角来决定飞机的前方
 
 
-
+*/
 
 
 		    	//躲避障碍物
@@ -314,10 +376,14 @@ void Copter::ModeZigZag::run()
 		    		 else
 		    	{
 		    	 zigzag_waypoint_state.obstacle_flag++;
+		    	 //遇见障碍物以后，走完三个避障点，继续往前走，
+		    	 //注意index的衔接，有可能走到之前的航点，风险，当心！！！
 		    	 if(zigzag_waypoint_state.obstacle_flag==3)
 		    	 {
-		    	 //zigzag_waypoint_state.obstacle_flag=0;
+		    	 zigzag_waypoint_state.obstacle_flag=0;
 		         zigzag_waypoint_state.index=zigzag_waypoint_state.index-1;//保护最后的航点
+		         //躲开障碍物之前，标志位不做处理
+		         zigzag_waypoint_state.meet_obstacle=0;
 		    		}
 		    	}
 
@@ -806,7 +872,8 @@ void Copter::ModeZigZag::zigzag_calculate_next_dest(/*Location_Class& dest*/Vect
 		//导致再一次更改航线，飞行方向的判断过于单一，风险，当心！！！
 		//完成一次避障飞行前，方向必须锁定
 
-		if(!zigzag_waypoint_state.obstacle_flag)
+		/*
+		 if(!zigzag_waypoint_state.obstacle_flag)
 		{
 		if(dist_direction<9)
 			fly_direction=1;
@@ -828,8 +895,13 @@ void Copter::ModeZigZag::zigzag_calculate_next_dest(/*Location_Class& dest*/Vect
 	  last_location.y=next.y;
 	  last_location.z=0;
 		 }
+*/
+		 //根据index直接判断飞行方向
 
-
+if(index%4==2)
+	fly_direction=-1;
+if(index%4==0)
+	fly_direction=1;
 
 
 	if(index==1)
@@ -842,6 +914,7 @@ void Copter::ModeZigZag::zigzag_calculate_next_dest(/*Location_Class& dest*/Vect
 	Vector3f obstacle_break=inertial_nav.get_position();
 	Vector3f virtual_obstacle,avoid_point;
 	float right_away=500,front_away=1000;//单位是cm
+	right_away=Lidar_avoid_distance;
 
 
 	//逆时针旋转当前点到虚拟y轴 A点成为原点（0，0）
@@ -859,8 +932,8 @@ void Copter::ModeZigZag::zigzag_calculate_next_dest(/*Location_Class& dest*/Vect
 	switch(zigzag_waypoint_state.obstacle_flag)
 		{
 		case 1:
-			  zigzag_waypoint_state.avoidA_pos.x=obstacle_break.x+avoid_direction*fly_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.x-zigzag_waypoint_state.vB_pos.x);
-			  zigzag_waypoint_state.avoidA_pos.y=obstacle_break.y+avoid_direction*fly_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.y-zigzag_waypoint_state.vB_pos.y);
+			  zigzag_waypoint_state.avoidA_pos.x=obstacle_break.x+Lidar_avoid_direction*fly_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.x-zigzag_waypoint_state.vB_pos.x);
+			  zigzag_waypoint_state.avoidA_pos.y=obstacle_break.y+Lidar_avoid_direction*fly_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.y-zigzag_waypoint_state.vB_pos.y);
 			  next.x = zigzag_waypoint_state.avoidA_pos.x;
 			  next.y = zigzag_waypoint_state.avoidA_pos.y;
 
@@ -885,8 +958,8 @@ void Copter::ModeZigZag::zigzag_calculate_next_dest(/*Location_Class& dest*/Vect
 			  //avoid_point.y=virtual_obstacle.y+front_away;
 			  break;
 		case 3:
-			   zigzag_waypoint_state.avoidC_pos.x=zigzag_waypoint_state.avoidB_pos.x-avoid_direction*fly_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.x-zigzag_waypoint_state.vB_pos.x);
-			   zigzag_waypoint_state.avoidC_pos.y=zigzag_waypoint_state.avoidB_pos.y-avoid_direction*fly_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.y-zigzag_waypoint_state.vB_pos.y);
+			   zigzag_waypoint_state.avoidC_pos.x=zigzag_waypoint_state.avoidB_pos.x-Lidar_avoid_direction*fly_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.x-zigzag_waypoint_state.vB_pos.x);
+			   zigzag_waypoint_state.avoidC_pos.y=zigzag_waypoint_state.avoidB_pos.y-Lidar_avoid_direction*fly_direction*right_away/zigzag_waypoint_state.width*(zigzag_waypoint_state.vC_pos.y-zigzag_waypoint_state.vB_pos.y);
 			   next.x = zigzag_waypoint_state.avoidC_pos.x;
 			   next.y = zigzag_waypoint_state.avoidC_pos.y;
 

@@ -170,6 +170,11 @@ void Buzzer::update()
         }
     }
 
+    //测试用 蜂鸣器一直叫！！！
+    //play_pattern(SINGLE_BUZZ);
+   // return;
+    //on(true);
+
     // check if armed status has changed
     if (_flags.armed != AP_Notify::flags.armed) {
         _flags.armed = AP_Notify::flags.armed;

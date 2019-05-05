@@ -1329,13 +1329,21 @@ public:
 		} zigzag_waypoint_state;
 
 
+		//读取雷达数据计时
+		int8_t time_Lidar=0;
+		int16_t time_data_handle=0;
+
+		float avoid_distance_sum,avoid_directon_sum;
+
 		//避障用变量
 		Vector3f last_location;
 		Vector3f next_location;
-		int8_t fly_direction,avoid_direction,object_detect_number;
+
+		//和 RPLidarA2定义名称相同，风险，当心！！！
+		int8_t fly_direction,object_detect_number;
 		int8_t fly_dir_lock=0;//飞行方向锁定标志位
-
-
+        //float avoid_distance,avoid_direction;
+		float Lidar_avoid_distance, Lidar_avoid_direction;
 		float object_angle[8],object_distance[8];
 		//const AP_Proximity & _object;
 		 // Vector3f next;//改成全局变量，测试用 风险，当心

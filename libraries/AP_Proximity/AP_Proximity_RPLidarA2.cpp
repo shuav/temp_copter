@@ -26,6 +26,7 @@
  *
  */
 
+
 #include <AP_HAL/AP_HAL.h>
 #include "AP_Proximity_RPLidarA2.h"
 #include <AP_SerialManager/AP_SerialManager.h>
@@ -501,8 +502,15 @@ void AP_Proximity_RPLidarA2::parse_response_descriptor()
 *修改作者：
 *备注信息：解析响应数据
 ****************************************************************************************************************/
+//int time_lidarA2=0;
+//float angle_lidarA2,distance_lidarA2;//测试用
+float lidarA2_test[9];
 void AP_Proximity_RPLidarA2::parse_response_data()
 {
+float D2R=0.017453;//角度转成弧度
+//bool front_obstacle=0;
+//bool back_obstacle=0;
+
     switch (_response_type){
         case ResponseType_SCAN:
             Debug(2, "UART %02x %02x%02x %02x%02x", payload[0], payload[2], payload[1], payload[4], payload[3]); //show HEX values
@@ -510,7 +518,169 @@ void AP_Proximity_RPLidarA2::parse_response_data()
             if ((payload.sensor_scan.startbit == !payload.sensor_scan.not_startbit) && payload.sensor_scan.checkbit) {
                 const float angle_deg = payload.sensor_scan.angle_q6/64.0f;
                 const float distance_m = (payload.sensor_scan.distance_q2/4000.0f);
-#if RP_DEBUG_LEVEL >= 2
+
+                //此雷达在扇区切换处容易出问题，360度，180度处
+                //处理数据，获取前方障碍物模型，假设前方障碍物为一条直线
+                //获得直线的距离，方位，从而计算出需要避障的距离和方位
+                //首先计算机头方向
+                //寻找前方障碍物的最大角度和最小角度
+
+                if(angle_deg>270&&angle_deg<350)
+                {
+                	if(distance_m!=0)
+                	{
+                		if(!point_left_front_find)
+                		{
+                		angle_left_front=angle_deg;
+                		distant_left_front=distance_m;
+                		point_left_front_find=1;
+                		}
+                		angle_right_front=angle_deg;
+                		distant_right_front=distance_m;
+                	}
+                }
+                //圈外
+                else
+                {
+                	if(point_left_front_find)
+                	{
+                	//前方有障碍物
+                	//front_obstacle=1;
+                	point_left_front_find=0;
+                	}
+                	else
+                		//front_obstacle=0;
+
+                	L_left_front=distant_left_front*sinf(D2R*(angle_left_front-315));
+                	L_right_front=distant_right_front*sinf(D2R*(angle_right_front-315));
+
+                	distante_object=(distant_left_front*cosf(D2R*(angle_left_front-315))+distant_right_front*cosf(D2R*(angle_right_front-315)))/2;
+                	if(L_left_front>=0&&L_right_front>=0)
+                	{
+                		avoid_distance=500-abs(L_left_front*100);//转换成cm
+                		avoid_direction=-1;//往左边飞
+                	}
+
+                	if(L_left_front<=0&&L_right_front>=0)
+                	{
+                		if(abs(L_left_front)>abs(L_right_front))
+                		{
+                			avoid_distance=500+abs(L_right_front*100);//转换成cm
+                			avoid_direction=1;//往右边飞
+                		}
+                		else
+                		{
+                			avoid_distance=500+abs(L_left_front*100);//转换成cm
+                			avoid_direction=-1;//往左边飞
+
+                		}
+
+                	}
+
+                	if(L_left_front<=0&&L_right_front<=0)
+                     {
+                		avoid_distance=500-abs(L_right_front*100);//转换成cm
+                		avoid_direction=1;//往右边飞
+                      }
+                	/*
+                	lidarA2_test[0]=angle_left_front;
+                	lidarA2_test[1]=distant_left_front;
+                	lidarA2_test[2]=angle_right_front;
+                	lidarA2_test[3]=distant_right_front;
+
+                	lidarA2_test[4]=avoid_distance;
+                	lidarA2_test[5]=avoid_direction;
+                	lidarA2_test[6]=distante_object;
+                	*/
+
+                }
+
+
+                                //计算机尾方向
+                                //寻找后方障碍物的最大角度和最小角度
+                                if(angle_deg>90&&angle_deg<170)
+                                {
+                                	if(distance_m!=0)
+                                	{
+                                		if(!point_left_back_find)
+                                		{
+                                		angle_left_back=angle_deg;
+                                		distant_left_back=distance_m;
+                                		point_left_back_find=1;
+                                		}
+                                		angle_right_back=angle_deg;
+                                		distant_right_back=distance_m;
+                                	}
+                                }
+                                //圈外
+                                else
+                                {
+                                	if(point_left_back_find)
+                                	{
+                                	//后方有障碍物
+                                	//back_obstacle=1;
+                                	point_left_back_find=0;
+                                	}
+                                	else
+                                	//	back_obstacle=0;
+
+                                	L_left_back=distant_left_back*sinf(D2R*(angle_left_back-135));
+                                	L_right_back=distant_right_back*sinf(D2R*(angle_right_back-135));
+
+                                	distante_object=(distant_left_back*cosf(D2R*(angle_left_back-135))+distant_right_back*cosf(D2R*(angle_right_back-135)))/2;
+                                	if(L_left_back>=0&&L_right_back>=0)
+                                	{
+                                		avoid_distance=500-abs(L_right_back*100);//转换成cm
+                                		avoid_direction=1;//往右边边飞
+                                	}
+
+                                    //和前方障碍物方向相反，请注意！！！
+                                	if(L_left_back>=0&&L_right_back<=0)
+                                	{
+                                		if(abs(L_left_back)>abs(L_right_back))
+                                		{
+                                			avoid_distance=500+abs(L_right_back*100);//转换成cm
+                                			avoid_direction=1;//往右边飞
+                                		}
+                                		else
+                                		{
+                                			avoid_distance=500+abs(L_left_back*100);//转换成cm
+                                			avoid_direction=-1;//往左边飞
+
+                                		}
+
+                                	}
+
+                                	if(L_left_back<=0&&L_right_back<=0)
+                                     {
+                                		avoid_distance=500-abs(L_left_back*100);//转换成cm
+                                		avoid_direction=-1;//往左边飞
+                                      }
+                                	lidarA2_test[0]=angle_left_back;
+                                	lidarA2_test[1]=distant_left_back;
+                                	lidarA2_test[2]=angle_right_back;
+                                	lidarA2_test[3]=distant_right_back;
+
+                                	lidarA2_test[4]=avoid_distance;
+                                	lidarA2_test[5]=avoid_direction;
+                                	lidarA2_test[6]=distante_object;
+
+                                }
+
+
+                //测试用
+                //angle_lidarA2=angle_deg;
+               // distance_lidarA2=distance_m;
+                /*
+                time_lidarA2++;
+                if(time_lidarA2>100)
+                {
+                	time_lidarA2=0;
+                    gcs().send_text(MAV_SEVERITY_INFO, "time_lidarA2: angle_deg=%f distance_m=%f", (double)angle_deg, (double)distance_m);
+
+                }
+*/
+                #if RP_DEBUG_LEVEL >= 2
                 const float quality = payload.sensor_scan.quality;
                 Debug(2, "                                       D%02.2f A%03.1f Q%02d", distance_m, angle_deg, quality);
 #endif

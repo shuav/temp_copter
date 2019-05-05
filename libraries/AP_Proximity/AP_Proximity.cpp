@@ -444,6 +444,20 @@ bool AP_Proximity::get_closest_object(float& angle_deg, float &distance) const
     return drivers[primary_instance]->get_closest_object(angle_deg, distance);
 }
 
+
+
+//新增函数 获取障碍物距离，躲避障碍物的方向和距离
+void AP_Proximity::get_object_info(float &distante_obj, float &avoid_dir,float& avoid_dis) const
+{
+	  if ((drivers[primary_instance] == nullptr) || (_type[primary_instance] == Proximity_Type_None)) {
+	        return;
+	    }
+
+	   drivers[primary_instance]->get_object_info(distante_obj, avoid_dir,avoid_dis);
+
+}
+
+
 // get number of objects, used for non-GPS avoidance
 uint8_t AP_Proximity::get_object_count() const
 {

@@ -31,7 +31,7 @@ https://github.com/shuav/Copter_3.6.5  代码网址
           2018-10-15:修改实现植保AB点控制移植，其中采用八通道进行AB点打点操作，
           2018-10-16:修改内八上锁，外八解锁
           2018-10-18:仿真命令：sudo apt-get install build-essential---初始化编辑器
-                             cd ArduCopter (cd Desktop/wenxinlong/temp_copter/ArduCopter)
+                             cd ArduCopter (cd Desktop/WenXL/temp_copter/ArduCopter)
                              ../Tools/autotest/sim_vehicle.py --console --map
                              output add 192.168.1.121:14550
           2018-10-24:修复自己的SITL仿真问题：
