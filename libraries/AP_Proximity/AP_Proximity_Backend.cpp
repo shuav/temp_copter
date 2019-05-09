@@ -73,12 +73,23 @@ bool AP_Proximity_Backend::get_closest_object(float& angle_deg, float &distance)
 
 
 //新增函数 获取障碍物距离，躲避障碍物的方向和距离
-void AP_Proximity_Backend::get_object_info(float &distante_obj, float &avoid_dir,float& avoid_dis) const
+void AP_Proximity_Backend::get_object_front(float &distante_obj, float &avoid_dir,float& avoid_dis) const
 {
-	distante_obj=distante_object;
-	avoid_dir=avoid_direction;
-	avoid_dis=avoid_distance;
+	distante_obj=distance_object_front;
+	avoid_dir=avoid_direction_front;
+	avoid_dis=avoid_distance_front;
 }
+
+void AP_Proximity_Backend::get_object_back(float &distante_obj, float &avoid_dir,float& avoid_dis) const
+{
+	distante_obj=distance_object_back;
+	avoid_dir=avoid_direction_back;
+	avoid_dis=avoid_distance_back;
+}
+
+
+
+
 
 // get number of objects, used for non-GPS avoidance
 uint8_t AP_Proximity_Backend::get_object_count() const

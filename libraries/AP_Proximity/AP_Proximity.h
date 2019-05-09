@@ -104,7 +104,9 @@ public:
     bool get_closest_object(float& angle_deg, float &distance) const;
 
     //增加的函数
-    void get_object_info(float &distante_obj, float &avoid_dir,float& avoid_dis) const;
+    void get_object_front(float &distante_obj, float &avoid_dir,float& avoid_dis) const;
+    void get_object_back(float &distante_obj, float &avoid_dir,float& avoid_dis) const;
+
 
     // get number of objects, angle and distance - used for non-GPS avoidance
     uint8_t get_object_count() const;

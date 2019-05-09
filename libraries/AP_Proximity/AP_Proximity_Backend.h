@@ -57,7 +57,8 @@ public:
     //   returns true on success, false if no valid readings
     bool get_closest_object(float& angle_deg, float &distance) const;
    //增加的函数
-    void get_object_info(float &distante_obj, float &avoid_dir,float& avoid_dis) const;
+    void get_object_front(float &distante_obj, float &avoid_dir,float& avoid_dis) const;
+    void get_object_back(float &distante_obj, float &avoid_dir,float& avoid_dis) const;
 
 
     // get number of objects, angle and distance - used for non-GPS avoidance
@@ -102,8 +103,10 @@ protected:
     float _distance[PROXIMITY_SECTORS_MAX];         // distance to closest object within each sector
     bool _distance_valid[PROXIMITY_SECTORS_MAX];    // true if a valid distance received for each sector
 
-    //增加障碍物信息数据
-    float avoid_distance, avoid_direction, distante_object;
+    //增加障碍物信息数据 //传递给后方的避障信息
+    float avoid_distance_front, avoid_direction_front, distance_object_front;
+    float avoid_distance_back, avoid_direction_back, distance_object_back;
+
 
     // fence boundary
     Vector2f _sector_edge_vector[PROXIMITY_SECTORS_MAX];    // vector for right-edge of each sector, used to speed up calculation of boundary

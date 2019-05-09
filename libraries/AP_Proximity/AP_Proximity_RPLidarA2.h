@@ -116,19 +116,21 @@ private:
     //新增 改动
 	float angle_left_front;
 	float distant_left_front;
-	uint8_t point_left_front_find=0;
+	uint8_t point_front_find=0;
     float angle_right_front;
     float distant_right_front;
     float L_left_front, L_right_front;
 
     float angle_left_back;
     float distant_left_back;
-    uint8_t point_left_back_find=0;
+    uint8_t point_back_find=0;
     float angle_right_back;
     float distant_right_back;
     float L_left_back, L_right_back;
 
 
+    //float distance_object_front,avoid_direction_front,avoid_distance_front;
+    //float distance_object_back,avoid_direction_back,avoid_distance_back;
 
 
 

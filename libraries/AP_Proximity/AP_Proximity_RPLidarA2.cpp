@@ -524,16 +524,16 @@ float D2R=0.017453;//角度转成弧度
                 //获得直线的距离，方位，从而计算出需要避障的距离和方位
                 //首先计算机头方向
                 //寻找前方障碍物的最大角度和最小角度
-
-                if(angle_deg>270&&angle_deg<350)
+               //右边切换处，有时数据会雷同，左右一样，风险，当心！！！
+                if(angle_deg>=270&&angle_deg<=360)
                 {
-                	if(distance_m!=0)
+                	if(distance_m>=0.5)
                 	{
-                		if(!point_left_front_find)
+                		if(!point_front_find)
                 		{
                 		angle_left_front=angle_deg;
                 		distant_left_front=distance_m;
-                		point_left_front_find=1;
+                		point_front_find=1;
                 		}
                 		angle_right_front=angle_deg;
                 		distant_right_front=distance_m;
@@ -542,128 +542,185 @@ float D2R=0.017453;//角度转成弧度
                 //圈外
                 else
                 {
-                	if(point_left_front_find)
+
+                	if(angle_deg<60)
+                	{
+
+                	if(point_front_find)
                 	{
                 	//前方有障碍物
                 	//front_obstacle=1;
-                	point_left_front_find=0;
-                	}
-                	else
-                		//front_obstacle=0;
-
+                	//point_front_find=0;
                 	L_left_front=distant_left_front*sinf(D2R*(angle_left_front-315));
                 	L_right_front=distant_right_front*sinf(D2R*(angle_right_front-315));
 
-                	distante_object=(distant_left_front*cosf(D2R*(angle_left_front-315))+distant_right_front*cosf(D2R*(angle_right_front-315)))/2;
+                	//测量数据存在噪声，有可能导致左右数据相等
+                	if(L_left_front!=L_right_front)
+                	{
+
+                	distance_object_front=(distant_left_front*cosf(D2R*(angle_left_front-315))+distant_right_front*cosf(D2R*(angle_right_front-315)))/2;
+
                 	if(L_left_front>=0&&L_right_front>=0)
-                	{
-                		avoid_distance=500-abs(L_left_front*100);//转换成cm
-                		avoid_direction=-1;//往左边飞
+                	                	{
+                	                		avoid_distance_front=500-abs(L_left_front*100);//转换成cm
+                	                		avoid_direction_front=-1;//往左边飞
+                	                	}
+
+                	                	if(L_left_front<0&&L_right_front>0)
+                	                	{
+                	                		//abs 会转成int类型，小心！！！
+                	                		if(abs(L_left_front*10)>abs(L_right_front*10))
+                	                		{
+                	                			avoid_distance_front=500+abs(L_right_front*100);//转换成cm
+                	                			avoid_direction_front=1;//往右边飞
+                	                		}
+                	                		else
+                	                		{
+                	                			avoid_distance_front=500+abs(L_left_front*100);//转换成cm
+                	                			avoid_direction_front=-1;//往左边飞
+
+                	                		}
+
+                	                	}
+
+                	                	if(L_left_front<0&&L_right_front<0)
+                	                     {
+                	                		avoid_distance_front=500-abs(L_right_front*100);//转换成cm
+                	                		avoid_direction_front=1;//往右边飞
+                	                      }
+
                 	}
 
-                	if(L_left_front<=0&&L_right_front>=0)
-                	{
-                		if(abs(L_left_front)>abs(L_right_front))
-                		{
-                			avoid_distance=500+abs(L_right_front*100);//转换成cm
-                			avoid_direction=1;//往右边飞
-                		}
-                		else
-                		{
-                			avoid_distance=500+abs(L_left_front*100);//转换成cm
-                			avoid_direction=-1;//往左边飞
+                	}
 
-                		}
+                	else//数值大，障碍物距离很远
+                		distance_object_front=133;
 
                 	}
 
-                	if(L_left_front<=0&&L_right_front<=0)
-                     {
-                		avoid_distance=500-abs(L_right_front*100);//转换成cm
-                		avoid_direction=1;//往右边飞
-                      }
-                	/*
+                	else
+                		point_front_find=0;
+
+
+                	//危险，小心，关掉障碍物标志后，else要关掉
+
+                	//else
+                	//distance_object_front=133;
+
+
+                		//front_obstacle=0;
+
+
+/*
                 	lidarA2_test[0]=angle_left_front;
                 	lidarA2_test[1]=distant_left_front;
                 	lidarA2_test[2]=angle_right_front;
                 	lidarA2_test[3]=distant_right_front;
 
-                	lidarA2_test[4]=avoid_distance;
-                	lidarA2_test[5]=avoid_direction;
-                	lidarA2_test[6]=distante_object;
-                	*/
+                	lidarA2_test[4]=avoid_distance_front;
+                	lidarA2_test[5]=avoid_direction_front;
+                	lidarA2_test[6]=distance_object_front;
 
+                	lidarA2_test[7]=L_left_front;
+                	lidarA2_test[8]=L_right_front;
+
+*/
                 }
 
 
                                 //计算机尾方向
                                 //寻找后方障碍物的最大角度和最小角度
-                                if(angle_deg>90&&angle_deg<170)
+                                if(angle_deg>=90&&angle_deg<=180)
                                 {
-                                	if(distance_m!=0)
+                                	if(distance_m>=0.5)
                                 	{
-                                		if(!point_left_back_find)
+                                		if(!point_back_find)
                                 		{
-                                		angle_left_back=angle_deg;
-                                		distant_left_back=distance_m;
-                                		point_left_back_find=1;
-                                		}
+                                			//方向反了 前 后方的数据很多地方相反，风险，当心！！！
                                 		angle_right_back=angle_deg;
                                 		distant_right_back=distance_m;
+
+                                		point_back_find=1;
+                                		}
+                                		angle_left_back=angle_deg;
+                                		distant_left_back=distance_m;
                                 	}
                                 }
                                 //圈外
                                 else
                                 {
-                                	if(point_left_back_find)
+
+                                	if(angle_deg>180)
+                                	{
+
+                                	if(point_back_find)
                                 	{
                                 	//后方有障碍物
                                 	//back_obstacle=1;
-                                	point_left_back_find=0;
+                                	//point_back_find=0;
+                                	L_left_back=distant_left_back*sinf(D2R*(angle_left_back-135));
+                                    L_right_back=distant_right_back*sinf(D2R*(angle_right_back-135));
+
+                                    //测量数据存在噪声，有可能导致左右数据相等
+                                    if(L_left_back!=L_right_back)
+                                    {
+
+                                    distance_object_back=(distant_left_back*cosf(D2R*(angle_left_back-135))+distant_right_back*cosf(D2R*(angle_right_back-135)))/2;
+
+                                    if(L_left_back>=0&&L_right_back>=0)
+                                    {
+                                     avoid_distance_back=500-abs(L_right_back*100);//转换成cm
+                                     avoid_direction_back=1;//往右边边飞
+                                      }
+
+                                      //和前方障碍物方向相反，请注意！！！
+                                      if(L_left_back>0&&L_right_back<0)
+                                       {
+                                       if(abs(L_left_back*10)>abs(L_right_back*10))
+                                       {
+                                       avoid_distance_back=500+abs(L_right_back*100);//转换成cm
+                                       avoid_direction_back=1;//往右边飞
+                                       }
+                                       else
+                                       {
+                                       avoid_distance_back=500+abs(L_left_back*100);//转换成cm
+                                       avoid_direction_back=-1;//往左边飞
+
+                                       }
+                                        }
+
+                                        if(L_left_back<0&&L_right_back<0)
+                                        {
+                                         avoid_distance_back=500-abs(L_left_back*100);//转换成cm
+                                         avoid_direction_back=-1;//往左边飞
+                                          }
+                                    }
                                 	}
+
+                                	//数值大，障碍物距离很远
+                                	 else
+                                	distance_object_back=133;
+
+                                	}
+
+
                                 	else
+                                		point_back_find=0;
                                 	//	back_obstacle=0;
 
-                                	L_left_back=distant_left_back*sinf(D2R*(angle_left_back-135));
-                                	L_right_back=distant_right_back*sinf(D2R*(angle_right_back-135));
 
-                                	distante_object=(distant_left_back*cosf(D2R*(angle_left_back-135))+distant_right_back*cosf(D2R*(angle_right_back-135)))/2;
-                                	if(L_left_back>=0&&L_right_back>=0)
-                                	{
-                                		avoid_distance=500-abs(L_right_back*100);//转换成cm
-                                		avoid_direction=1;//往右边边飞
-                                	}
-
-                                    //和前方障碍物方向相反，请注意！！！
-                                	if(L_left_back>=0&&L_right_back<=0)
-                                	{
-                                		if(abs(L_left_back)>abs(L_right_back))
-                                		{
-                                			avoid_distance=500+abs(L_right_back*100);//转换成cm
-                                			avoid_direction=1;//往右边飞
-                                		}
-                                		else
-                                		{
-                                			avoid_distance=500+abs(L_left_back*100);//转换成cm
-                                			avoid_direction=-1;//往左边飞
-
-                                		}
-
-                                	}
-
-                                	if(L_left_back<=0&&L_right_back<=0)
-                                     {
-                                		avoid_distance=500-abs(L_left_back*100);//转换成cm
-                                		avoid_direction=-1;//往左边飞
-                                      }
                                 	lidarA2_test[0]=angle_left_back;
                                 	lidarA2_test[1]=distant_left_back;
                                 	lidarA2_test[2]=angle_right_back;
                                 	lidarA2_test[3]=distant_right_back;
 
-                                	lidarA2_test[4]=avoid_distance;
-                                	lidarA2_test[5]=avoid_direction;
-                                	lidarA2_test[6]=distante_object;
+                                	lidarA2_test[4]=avoid_distance_back;
+                                	lidarA2_test[5]=avoid_direction_back;
+                                	lidarA2_test[6]=distance_object_back;
+
+                                	lidarA2_test[7]=L_left_back;
+                                	lidarA2_test[8]=L_right_back;
+
 
                                 }
 
