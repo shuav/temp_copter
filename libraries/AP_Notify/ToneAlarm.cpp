@@ -172,6 +172,8 @@ void AP_ToneAlarm::check_cont_tone()
 // update - updates led according to timed_updated.  Should be called at 50Hz
 void AP_ToneAlarm::update()
 {
+	//gcs().send_text(MAV_SEVERITY_INFO, "Buzzer2");
+
     // exit if buzzer is not enabled
     if (pNotify->buzzer_enabled() == false) {
         return;
@@ -377,6 +379,7 @@ void AP_ToneAlarm::update()
         play_tone(AP_NOTIFY_TONE_TUNING_ERROR);
         AP_Notify::events.tune_error = 0;
     }
+
 }
 
 

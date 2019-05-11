@@ -19,9 +19,9 @@ void Copter::ModeZigZag::ModeZigZag(const AP_Proximity& proximity)
 bool Copter::ModeZigZag::init(bool ignore_checks)
 {
 	//测试用，风险，当心
-	zigzag_mode = Zigzag_Auto;
-	 return true;
-/*
+	//zigzag_mode = Zigzag_Auto;
+	 //return true;
+
     if (!(motors->armed()) ) //没解锁就会立即退出初始化的过程
     {
         return false;
@@ -102,7 +102,7 @@ bool Copter::ModeZigZag::init(bool ignore_checks)
         {
             return false;
         }
-        */
+
 }
 
 /***********************************************************************************************************************
@@ -117,18 +117,18 @@ extern float distant_temp;
 extern Vector3f destination_temp;
 Vector3f next_printf;//测试用
 
-int state_zigzag=0;//测试用，zigzag状态变量
+//int state_zigzag=0;//测试用，zigzag状态变量
 
 
 void Copter::ModeZigZag::run()
 {
 	//先关掉，切入自动模式，风险，当心！！！
-		zigzag_mode=Zigzag_Auto;
+		//zigzag_mode=Zigzag_Auto;
 
 
 	//如果没有自动解锁，电机没有使能，设置油门值为零，并且立即退出------ if not auto armed or motors not enabled set throttle to zero and exit immediately
 
- /*
+
 	if (!motors->armed() || !ap.auto_armed || !motors->get_interlock() || ap.land_complete)
 		    {
 		#if FRAME_CONFIG == HELI_FRAME  // Helicopters always stabilize roll/pitch/yaw
@@ -151,7 +151,7 @@ void Copter::ModeZigZag::run()
 		        return;
 		    }
 
-	*/
+
 
 
 
@@ -195,7 +195,7 @@ void Copter::ModeZigZag::run()
 		    		if(closest_distance<1.3&&closest_distance>0.7)
 		    		{
 		    			//先关掉，风险，当心！！！
-		    		//zigzag_mode = Zigzag_Manual;
+		    		zigzag_mode = Zigzag_Manual;
 		    		AP_Notify::flags.zigzag_record_mode=0;
 		    		gcs().send_text(MAV_SEVERITY_WARNING,"Zigzag manual closest_distance"); //发送自动信息
 		    		zigzag_auto_complete_state = false;
@@ -213,12 +213,12 @@ void Copter::ModeZigZag::run()
 
 		    		//风险，小心，测试用  障碍物标志关掉了
 		    		//如果障碍物直接在3m内，有问题，风险，当心！！！
-		    		if(Lidar_distante_object<5&&Lidar_distante_object>3)
-		    		//if(Lidar_distante_object<5&&Lidar_distante_object>3&&!zigzag_waypoint_state.meet_obstacle)
+		    		//if(Lidar_distante_object<5&&Lidar_distante_object>3)
+		    		if(Lidar_distante_object<8&&Lidar_distante_object>=5&&!zigzag_waypoint_state.meet_obstacle)
 		    		{
 
 		    			//后面要关闭这里，风险，小心
-		    			zigzag_waypoint_state.meet_obstacle=0;
+		    			//zigzag_waypoint_state.meet_obstacle=0;
 
 
 		    			avoid_distance_sum+=avoid_distance;
@@ -236,7 +236,7 @@ void Copter::ModeZigZag::run()
 
 		    		//障碍物小于5m,计算避障距离和方向，障碍物标志位置位 只能计算一次
 		    		//if(Lidar_distante_object<3)//风险，小心，测试用  障碍物标志关掉了
-		    		if(Lidar_distante_object<3&&!zigzag_waypoint_state.meet_obstacle)
+		    		if(Lidar_distante_object<5&&!zigzag_waypoint_state.meet_obstacle)
 		    		{
 		    			//后面要打开这里，风险，小心
 		    			zigzag_waypoint_state.meet_obstacle=1;
@@ -265,8 +265,9 @@ void Copter::ModeZigZag::run()
 		    		if(next_temp>1000)
 		    		{
 		    			next_temp=0;
-		    			gcs().send_text(MAV_SEVERITY_INFO, "distante_object=%f", (double)Lidar_distante_object);
-		    			gcs().send_text(MAV_SEVERITY_INFO, "avoid_direction: =%f,avoid_distance=%f", (double)Lidar_avoid_direction,(double)Lidar_avoid_distance);
+		    			//gcs().send_text(MAV_SEVERITY_INFO, "distante_object=%f", (double)Lidar_distante_object);
+		    			//gcs().send_text(MAV_SEVERITY_INFO, "avoid_direction: =%f,avoid_distance=%f", (double)Lidar_avoid_direction,(double)Lidar_avoid_distance);
+
 		    			//gcs().send_text(MAV_SEVERITY_INFO, "zigzag_waypoint_state=%f", (double)zigzag_waypoint_state.flag);
 		    			//gcs().send_text(MAV_SEVERITY_INFO, "fly_direction=%f",  (double)fly_direction);
 
@@ -275,12 +276,20 @@ void Copter::ModeZigZag::run()
 		    				//先关掉
 		    				gcs().send_text(MAV_SEVERITY_WARNING, "There is a obstacle in the front");
 		    			    AP_Notify::flags.zigzag_record = 16;
+
+		    			    //闪红灯 表示遇到障碍物
+		    			    AP_Notify::flags.zigzag_record_mode_erro=3;
+		    			    AP_Notify::events.user_mode_change=1;
+
 		    				}
 
 		    				else
 		    				{
 		    					gcs().send_text(MAV_SEVERITY_WARNING, "We are away from obstacle  ");
 		    				    AP_Notify::flags.zigzag_record = 16;
+
+		    				    AP_Notify::flags.zigzag_record_mode_erro=0;
+		    				    AP_Notify::events.user_mode_change=0;
 		    					}
 		    		}
 
@@ -421,8 +430,8 @@ void Copter::ModeZigZag::run()
 		    	if(zigzag_auto_complete_state && !zigzag_change_yaw||(zigzag_waypoint_state.meet_obstacle&&!zigzag_waypoint_state.obstacle_flag)) //第一次：zigzag_auto_complete_state=1，zigzag_change_yaw=0;
 		    	{
 
-		    		state_zigzag=1;//测试用
-		    		gcs().send_text(MAV_SEVERITY_INFO, "state_zigzag=%f", (double)state_zigzag);
+		    		//state_zigzag=1;//测试用
+		    		//gcs().send_text(MAV_SEVERITY_INFO, "state_zigzag=%f", (double)state_zigzag);
 
 
 		    		AP_Notify::flags.avoid_course++;
@@ -449,7 +458,7 @@ void Copter::ModeZigZag::run()
 		         //躲开障碍物之前，标志位不做处理
 
 		         //测试，有重大变动，当心，风险 后面要打开
-		         //zigzag_waypoint_state.meet_obstacle=0;
+		         zigzag_waypoint_state.meet_obstacle=0;
 		    		}
 		    	}
 
@@ -752,8 +761,8 @@ void Copter::ModeZigZag::zigzag_set_destination(void)
 		if(!zigzag_waypoint_state.obstacle_flag)
 	    zigzag_waypoint_state.index++;
 
-		state_zigzag=2;//测试用
-		gcs().send_text(MAV_SEVERITY_INFO, "state_zigzag=%f", (double)state_zigzag);
+		//state_zigzag=2;//测试用
+		//gcs().send_text(MAV_SEVERITY_INFO, "state_zigzag=%f", (double)state_zigzag);
 
 
 		zigzag_calculate_next_dest(next, zigzag_waypoint_state.index);

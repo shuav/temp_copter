@@ -611,7 +611,7 @@ float D2R=0.017453;//角度转成弧度
                 		//front_obstacle=0;
 
 
-/*
+
                 	lidarA2_test[0]=angle_left_front;
                 	lidarA2_test[1]=distant_left_front;
                 	lidarA2_test[2]=angle_right_front;
@@ -624,7 +624,8 @@ float D2R=0.017453;//角度转成弧度
                 	lidarA2_test[7]=L_left_front;
                 	lidarA2_test[8]=L_right_front;
 
-*/
+
+
                 }
 
 
@@ -708,7 +709,7 @@ float D2R=0.017453;//角度转成弧度
                                 		point_back_find=0;
                                 	//	back_obstacle=0;
 
-
+/*
                                 	lidarA2_test[0]=angle_left_back;
                                 	lidarA2_test[1]=distant_left_back;
                                 	lidarA2_test[2]=angle_right_back;
@@ -721,7 +722,7 @@ float D2R=0.017453;//角度转成弧度
                                 	lidarA2_test[7]=L_left_back;
                                 	lidarA2_test[8]=L_right_back;
 
-
+*/
                                 }
 
 
